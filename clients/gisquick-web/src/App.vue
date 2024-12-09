@@ -1,5 +1,6 @@
 <template>
   <div id="app" class="app f-col">
+    <MapNameBar :mapName="title" v-if="projectStatus === 200"  />
     <intro-page v-if="!projectName"/>
     <map-app v-if="projectStatus === 200" :key="projectKey"/>
     <login-dialog
@@ -73,6 +74,7 @@ import AppNotifications from './AppNotifications.vue'
 import projectsHistory from '@/projects-history'
 import Update from '@/mixins/update'
 import { parseColor } from '@/ui/utils/colors'
+import MapNameBar from './components/MapNameBar.vue';
 
 export default {
   mixins: [ Update ],
@@ -83,12 +85,14 @@ export default {
     IntroPage,
     ServerError,
     AppNotifications,
+    MapNameBar,
     MapApp: async () => window.env.mobile ? MobileMap : DesktopMap
   },
   data () {
     return {
       projectKey: 0,
-      showInstallPrompt: false
+      showInstallPrompt: false,
+      title: '', 
     }
   },
   computed: {
@@ -110,6 +114,7 @@ export default {
     this.loadProject()
   },
   mounted () {
+   
     if (window.env.mobile) {
       const setHeightStyle = () => {
         const vh = window.innerHeight / 100
@@ -164,6 +169,7 @@ export default {
       const title = data.title || data.root_title
       if (title) {
         document.title = title
+        this.title = title // Pass the title to MapNameBar
       }
       const themeColor = data.app?.theme_color
       if (themeColor) {
@@ -175,7 +181,6 @@ export default {
           console.error(`Invalid theme color: ${themeColor}`)
         }
       }
-
     },
     onLogin (user) {
       this.$store.commit('user', user)
