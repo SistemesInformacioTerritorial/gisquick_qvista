@@ -15,3 +15,4 @@ server/webgis/viewer/static/
 
 docker/docker-compose.yml
 docker/_data
+package-lock.json

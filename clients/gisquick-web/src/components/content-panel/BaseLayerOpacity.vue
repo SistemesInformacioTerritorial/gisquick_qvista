@@ -12,7 +12,7 @@
       step="0.01"
       class="f-grow mx-2 my-0"
       :colors="colors"
-      marker-blend-color="#bbbbbbff"
+      marker-blend-color="#bbbbbbff" 
       v-model="opacity"
       hide-range-labels
     />
