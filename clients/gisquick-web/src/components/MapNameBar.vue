@@ -2,7 +2,7 @@
     <div class="map-name-bar">
       <div class="logo-panel">
         <img src="@/assets/qvista_logo.svg" alt="Logo" class="logo" />
-        <span class="text-logo">qVistaWeb</span>
+        <span class="text-logo">qVista Web</span>
       </div>
       <span class="map-name">{{ mapName }}</span>
     </div>
@@ -25,8 +25,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-dark);
-    color: var(--color-grey);
+    background-color: var(--qvista-primary-dark);
+    color: var(--qvista-color-grey-1);
     padding: 10px;
     font-size: 18px;
     font-weight: bold;
@@ -43,12 +43,13 @@
   .logo {
     width: 30px;
     height: 30px;
-    margin-right: 10px;
+    margin-right: 20px;
   }
   
   .text-logo {
     font-size: 18px;
     font-weight: bold;
+    margin-left: 35px;
   }
   
   .map-name {
