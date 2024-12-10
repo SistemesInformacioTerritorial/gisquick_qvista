@@ -14,81 +14,85 @@ msgstr ""
 
 #: src/components/measure/Measure.vue:37
 msgid "1st coordinate"
-msgstr "1. Koordinate"
+msgstr "1ª Coordenada"
 
 #: src/components/measure/Measure.vue:38
 msgid "2nd coordinate"
-msgstr "2. Koordinate"
+msgstr "2ª Coordenada"
 
 #: src/App.vue:22
 msgid "A new version of the map application is available"
-msgstr "Eine neue Version der Kartenanwendung ist verfügbar"
+msgstr "Una nova versio de l'aplicació està disponible"
 
 #: src/components/content-panel/BaseLayersTree.vue:43
 #: src/components/content-panel/LayersTree.vue:100
 #: src/components/content-panel/TopicsList.vue:36
 msgid "Abstract"
-msgstr "Beschreibung"
+msgstr "Resum"
 
 #: src/components/feature-editor/GeometryEditor.vue:16
 #: src/components/feature-editor/GeometryEditor.vue:59
 msgid "Add geometry"
-msgstr "Geometrie hinzufügen"
+msgstr "Afegir geometria"
 
 #: src/components/attributes-table/AttributesTable.vue:57
 #: src/components/attributes-table/MobileAttributesTable.vue:281
 msgid "Add new feature"
-msgstr "Neue Funktion hinzufügen"
+msgstr "Afegir nova feature"
 
 #: src/App.vue:41
 msgid "Add to Home screen?"
-msgstr "Zum Startbildschirm hinzufügen?"
+msgstr "Afegir a la pantalla d'inici?"
 
 #: src/ui/TextEditor.vue:357
 msgid "Align center"
-msgstr "Mitte ausrichten"
+msgstr "Alinia centre"
 
 #: src/ui/TextEditor.vue:356
 msgid "Align left"
-msgstr "Links ausrichten"
+msgstr "Alinia a l'esquerra"
 
 #: src/ui/TextEditor.vue:358
 msgid "Align right"
-msgstr "Rechts ausrichten"
+msgstr "Alinia a la dreta"
 
 #: src/components/feature-editor/SnapTool.vue:85
 #: src/components/Identification.vue:148
 msgid "All visible layers"
-msgstr "Alle sichtbaren Ebenen"
+msgstr "Totes les capes visibles"
 
 #: src/IntroPage.vue:19
 msgid ""
-"Already registered? You can continue with Sign In to see list of\n"
+"Ja estàs registrat? You can continue with Sign In to see list of\n"
 "your projects"
 msgstr ""
-"Sind Sie bereits registriert? Sie können mit Sign In fortfahren, um die "
-"Liste Ihrer Projekte"
+"Ja està registrat Continua amb l'entrada per veure la llista dels\n"
+"teus projectes"
+
+
+
+
 
 #: src/components/feature-editor/ImageInput.vue:152
 msgid "Apply"
-msgstr "Anwenden"
+msgstr "Aplicar"
 
 #: src/ui/DatePicker.vue:175
 msgid "April"
-msgstr "April"
+msgstr "Abril"
 
 #: src/components/measure/Measure.vue:125
 #: src/components/measure/Measure.vue:259
 msgid "Area"
-msgstr "Bereich"
+msgstr "Àrea"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:333
 msgid "Attributes"
-msgstr "Attribute"
+msgstr "Atributs"
 
 #: src/components/MapTools.vue:104
 msgid "Attributes Table"
-msgstr "Attribute-Tabelle"
+msgstr "Taula Atributs"
 
 #: src/ui/DatePicker.vue:179
 msgid "August"
@@ -96,15 +100,15 @@ msgstr "Agost"
 
 #: src/components/LoginDialog.vue:25
 msgid "Authentication failed"
-msgstr "Falla"
+msgid "Autentificació fallida"
 
 #: src/components/LoginDialog.vue:110
 msgid "Back to Login"
-msgstr "Zurück zur Anmeldung"
+msgstr "Torna a l'entrada"
 
 #: src/ui/TextEditor.vue:354
 msgid "Background color"
-msgstr "Hintergrundfarbe"
+msgstr "Color de fons"
 
 #: src/components/content-panel/ContentPanel.vue:107
 msgid "Base Layers"
@@ -113,39 +117,39 @@ msgstr "Capes Base"
 #: src/components/attributes-table/AttributeFilter.vue:264
 #: src/components/attributes-table/AttributeFilter.vue:276
 msgid "between"
-msgstr "zwischen"
+msgstr "entre"
 
 #: src/ui/TextEditor.vue:346
 msgid "Bold"
-msgstr "Kühnschrift"
+msgstr "Negreta"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:166
 #: src/components/feature-editor/ImageInput.vue:156
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr "Cancel·la"
 
 #: src/components/measure/Measure.vue:226
 msgid "Clear"
-msgstr "Löschen"
+msgstr "Esborra"
 
 #: src/components/measure/Measure.vue:227
 msgid "Clear all"
-msgstr "Alles löschen"
+msgstr "Esborrar tot"
 
 #: src/components/attributes-table/TableView.vue:123
 #: src/components/attributes-table/MobileAttributesTable.vue:326
 msgid "Clear attributes filters"
-msgstr "Attributfilter löschen"
+msgstr "Esborra tots els filtres d'atributs"
 
 #: src/AppNotifications.vue:17
 #: src/components/feature-editor/RelationWidget.vue:77
 #: src/components/LocationTool.vue:20 src/UserDashboard.vue:109
 msgid "Close"
-msgstr "Schließen"
+msgstr "Tenca"
 
 #: src/components/attributes-table/AttributeFilter.vue:273
 msgid "contain"
-msgstr "enthält"
+msgstr "conté"
 
 #: src/components/content-panel/ContentPanel.vue:4
 msgid "Content"
@@ -153,23 +157,23 @@ msgstr "Contingut"
 
 #: src/components/LoginDialog.vue:103
 msgid "Continue as Guest"
-msgstr "Weiter als Gast"
+msgstr "Continua com a hoste"
 
 #: src/components/measure/Measure.vue:228
 msgid "Coordinate systems"
-msgstr "Koordinatensysteme"
+msgstr "Sistema de coordenades"
 
 #: src/components/BottomToolbar.vue:9
 msgid "Coordinates"
-msgstr "Coodernades"
+msgstr "Coordenades"
 
 #: src/ui/TextEditor.vue:327
 msgid "Copy HTML"
-msgstr "HTML kopieren"
+msgstr "Copia HTML"
 
 #: src/UserDashboard.vue:64
 msgid "Created"
-msgstr "Erstellt"
+msgstr "Creat"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:96
 #: src/components/content-panel/LayersTree.vue:104
@@ -178,37 +182,37 @@ msgstr "Dades"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:45
 msgid "Data Filters"
-msgstr "Datenfilter"
+msgstr "Filtres de dades"
 
 #: src/components/feature-editor/FeatureEditor.vue:93
 #: src/components/feature-editor/NewFeatureEditor.vue:49
 msgid "Data updated"
-msgstr "Daten aktualisiert"
+msgstr "Data actualitzada"
 
 #: src/ui/DatePicker.vue:183
 msgid "December"
-msgstr "Dezember"
+msgstr "Desembre"
 
 #: src/components/feature-editor/FeatureEditor.vue:102
 #: src/components/feature-editor/FeatureEditor.vue:118
 msgid "Delete current object?"
-msgstr "Aktuelles Objekt löschen?"
+msgstr "Esborrar objecte?"
 
 #: src/components/feature-editor/FeatureEditor.vue:59
 msgid "Delete object"
-msgstr "Objekt löschen"
+msgstr "Esborrar objecte"
 
 #: src/components/feature-editor/GeometryEditor.vue:440
 msgid "Delete selected geometry"
-msgstr "Ausgewählte Geometrie löschen"
+msgstr "Esborrar geometria seleccionada"
 
 #: src/components/feature-editor/GeometryEditor.vue:439
 msgid "Delete selected nodes"
-msgstr "Ausgewählte Knoten löschen"
+msgstr "Esborrar nodes seleccionats"
 
 #: src/components/feature-editor/FeatureEditor.vue:68
 msgid "Discard changes"
-msgstr "Änderungen abbrechen"
+msgstr "Descartar canvis"
 
 #: src/components/MapAttributions.vue:22
 msgid "Display attributions"
@@ -216,32 +220,32 @@ msgstr "Mostra Atributs"
 
 #: src/components/measure/Measure.vue:258
 msgid "Distance"
-msgstr "Entfernung"
+msgstr "Distància"
 
 #: src/AppNotifications.vue:57
 msgid "Don't show this message again"
-msgstr "Diese Meldung nicht mehr anzeigen"
+msgstr "No tornis a mostrar aquest missatge"
 
 #: src/components/content-panel/LayersTree.vue:119
 msgid "Download"
-msgstr "Herunterladen"
+msgstr "Descarregar"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:355
 msgid "Edit"
-msgstr "Editieren"
+msgstr "Editar"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:143
 msgid "Edit feature"
-msgstr "Objekt editieren"
+msgstr "Editar feature"
 
 #: src/components/feature-editor/FeatureEditor.vue:32
 #: src/components/measure/Measure.vue:13
 msgid "Edit geometry"
-msgstr "Geometrie editieren"
+msgstr "Editar geometria"
 
 #: src/components/feature-editor/GenericEditForm.vue:33
 msgid "Edit value manually"
-msgstr "Wert manuell editieren"
+msgstr "Editar valor manualment"
 
 #: src/components/LoginDialog.vue:167
 msgid "Email"
@@ -249,24 +253,24 @@ msgstr "Email"
 
 #: src/components/LoginDialog.vue:172
 msgid "Email was sent to given email address."
-msgstr "Email wurde an die angegebene Email-Adresse gesendet."
+msgstr "Correu electrònic enviat a la adreça de correu donada"
 
 #: src/components/attributes-table/AttributeFilter.vue:274
 msgid "empty"
-msgstr "leer"
+msgstr "buida"
 
 #: src/components/LoginDialog.vue:168
 msgid ""
 "Enter your email address below and we will email instructions for setting a "
 "new password."
 msgstr ""
-"Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen eine Anleitung zum "
-"Einrichten eines neuen Passworts zu."
+"Entra la teva adreça de correu electrònic i t'enviarem instruccions per a "
+"establir una nova password"
 
 #: src/components/attributes-table/AttributeFilter.vue:263
 #: src/components/attributes-table/AttributeFilter.vue:267
 msgid "equal to"
-msgstr "gleich"
+msgstr "igual a"
 
 #: src/components/content-panel/JsonLegend.vue:12
 #: src/components/feature-editor/FeatureEditor.vue:255
@@ -274,43 +278,43 @@ msgstr "gleich"
 #: src/components/SearchTool.vue:257 src/ui/ListTable.vue:105
 #: src/ui/Table.vue:211
 msgid "Error"
-msgstr "Fehler"
+msgstr "Error"
 
 #: src/components/attributes-table/AttributesTable.vue:68
 #: src/components/attributes-table/MobileAttributesTable.vue:288
 msgid "Export"
-msgstr "Exportieren"
+msgstr "Exportar"
 
 #: src/components/attributes-table/fetch.js:140
 msgid "Failed to load data"
-msgstr "Daten konnten nicht geladen werden"
+msgstr "Error al pujar dades"
 
 #: src/components/LoginDialog.vue:171
 msgid "Failed to process your request."
-msgstr "Bearbeitung Ihrer Anfrage ist fehlgeschlagen."
+msgstr "Error al processar la vostra petició"
 
 #: src/components/feature-editor/MediaFileField.vue:226
 msgid "Failed to upload file"
-msgstr "Dateiupload fehlgeschlagen"
+msgstr "Error al pujar el fitxer"
 
 #: src/ui/DatePicker.vue:173
 msgid "February"
-msgstr "Februar"
+msgstr "Febrer"
 
 #: src/components/feature-editor/GenericEditForm.vue:117
 msgid "Field is required"
-msgstr "Feld ist erforderlich"
+msgstr "Camp requerit"
 
 #: src/components/feature-editor/ImageInput.vue:244
 #: src/components/feature-editor/ImageInput.vue:296
 #: src/components/feature-editor/SimpleFileInput.vue:91
 msgid "File exceeds maximum allowed size"
-msgstr "Datei überschreitet die maximal zulässige Größe"
+msgstr "L'arxiu excedeix la mida màxima permesa"
 
 #: src/components/attributes-table/TableView.vue:133
 #: src/components/attributes-table/AttributeFilter.vue:261
 msgid "Filter"
-msgstr "Filter"
+msgstr "Filtrar"
 
 #: src/components/attributes-table/AttributeFilter.vue:48
 msgid "Filter by attribute value"
@@ -319,11 +323,11 @@ msgstr "Filtrar per valor de l'atribut"
 #: src/components/attributes-table/MobileAttributesTable.vue:382
 #: src/components/attributes-table/TableView.vue:192
 msgid "Filter to visible area"
-msgstr "Sichtbaren Bereich filtern"
+msgstr "Filtrar a l'àrea visible"
 
 #: src/components/LoginDialog.vue:111
 msgid "Forgot password?"
-msgstr "Passwort vergessen?"
+msgstr "Has oblidat la password?"
 
 #: src/components/feature-editor/ImageInput.vue:15
 #: src/components/feature-editor/ImageInput.vue:52
@@ -332,7 +336,7 @@ msgstr "Format"
 
 #: src/ui/DatePicker.vue:167
 msgid "Friday"
-msgstr "Freitag"
+msgstr "Divendres"
 
 #: src/components/AppMenu.vue:87
 msgid "Full screen"
@@ -340,11 +344,11 @@ msgstr "Finestra completa"
 
 #: src/components/LocationTool.vue:98
 msgid "Geolocation Error"
-msgstr "Geopositionsfehler"
+msgstr "Error de Geolocalització"
 
 #: src/components/attributes-table/AttributeFilter.vue:269
 msgid "greater than"
-msgstr "größer als"
+msgstr "més gran que"
 
 #: src/components/AppMenu.vue:97
 msgid "Help"
@@ -356,11 +360,11 @@ msgstr "Hyperlink"
 
 #: src/components/content-panel/LayersTree.vue:96
 msgid "Identification"
-msgstr "Identifizierung"
+msgstr "Identificació"
 
 #: src/components/feature-editor/ImageInput.vue:28
 msgid "Image will be saved in lower resolution"
-msgstr "Bild wird in geringerer Auflösung gespeichert"
+msgstr "La imatge es desarà en una resolució més baixa"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:349
 #: src/components/Identification.vue:156
@@ -369,48 +373,47 @@ msgstr "Infopanel"
 
 #: src/components/attributes-table/AttributeFilter.vue:279
 msgid "Integer"
-msgstr "Ganzzahl"
+msgstr "Enter"
 
 #: src/components/attributes-table/AttributeFilter.vue:281
 msgid "Integer,Integer"
-msgstr "Ganzzahl,Ganzzahl"
+msgstr "Enter,Enter"
 
 #: src/components/attributes-table/AttributeFilter.vue:280
 msgid "Integer,Integer,..."
-msgstr "Ganzzahl,..."
+msgstr "Enter,..."
 
 #: src/App.vue:43
 msgid ""
 "It will give you the experience of a native app, with easy access and a "
 "standalone window without the browser's address bar and other controls."
 msgstr ""
-"Bietet Ihnen die Erfahrung einer nativen App, mit einfachem Zugriff und "
-"eigenständigem Fenster ohne die Adressleiste des Browsers und andere "
-"Steuerelemente."
+"It will give you the experience of a native app, with easy access and a "
+"standalone window without the browser's address bar and other controls."
 
 #: src/ui/TextEditor.vue:347
 msgid "Italic"
-msgstr "Kursivschrift"
+msgstr "Itàlica"
 
 #: src/ui/DatePicker.vue:172
 msgid "January"
-msgstr "Januar"
+msgstr "Gener"
 
 #: src/ui/DatePicker.vue:178
 msgid "July"
-msgstr "Juli"
+msgstr "Juliol"
 
 #: src/ui/DatePicker.vue:177
 msgid "June"
-msgstr "Juni"
+msgstr "Juny"
 
 #: src/components/content-panel/BaseLayersTree.vue:46
 msgid "Keywords list"
-msgstr "Stichwortliste"
+msgstr "Llista de paraules clau"
 
 #: src/components/AppMenu.vue:15 src/components/AppMenu.vue:78
 msgid "Language"
-msgstr "Sprache"
+msgstr "Idioma"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:379
 #: src/components/EditTool.vue:153 src/components/Identification.vue:190
@@ -423,7 +426,7 @@ msgstr "Capes"
 
 #: src/components/print/Print.vue:87
 msgid "Layout"
-msgstr "Layout"
+msgstr "Disposició"
 
 #: src/components/content-panel/ContentPanel.vue:109
 msgid "Legend"
@@ -435,7 +438,7 @@ msgstr "kleiner als"
 
 #: src/components/attributes-table/tool.js:105
 msgid "link"
-msgstr "Link"
+msgstr "Enllaç"
 
 #: src/components/Map.vue:56
 msgid "Loading"
@@ -443,7 +446,7 @@ msgstr "Carregant"
 
 #: src/components/measure/Measure.vue:257
 msgid "Location"
-msgstr "Standort"
+msgstr "Localització"
 
 #: src/components/LoginDialog.vue:94 src/components/AppMenu.vue:65
 msgid "Login"
@@ -455,22 +458,22 @@ msgstr "Surt"
 
 #: src/ui/DatePicker.vue:174
 msgid "March"
-msgstr "März"
+msgstr "Març"
 
 #: src/ui/DatePicker.vue:176
 msgid "May"
-msgstr "Mai"
+msgstr "Maig"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:381
 #: src/components/EditTool.vue:155 src/components/Identification.vue:191
 #: src/components/measure/Measure.vue:225 src/components/print/Print.vue:86
 #: src/ui/TextEditor.vue:359 src/UserDashboard.vue:210
 msgid "Menu"
-msgstr "Menü"
+msgstr "Menú"
 
 #: src/ui/DatePicker.vue:163
 msgid "Monday"
-msgstr "Montag"
+msgstr "Dilluns"
 
 #: src/components/AppMenu.vue:58 src/UserDashboard.vue:197
 msgid "My profile"
@@ -483,120 +486,120 @@ msgstr "Els meus projectes"
 #: src/components/attributes-table/MobileAttributesTable.vue:34
 #: src/components/InfoPanel.vue:203
 msgid "New Feature"
-msgstr "Neues Objekt"
+msgstr "Nova Feature"
 
 #: src/IntroPage.vue:29
 msgid ""
 "New to Gisquick? Create a new account if you want to publish your\n"
 "own maps!"
 msgstr ""
-"Neu bei Gisquick? Erstellen Sie ein neues Konto, wenn Sie Ihre eigenen "
-"Karten veröffentlichen möchten!"
+"Nou al Gisquick? Crea't una nova conta si vols publicar els \n "
+"teus propis mapes!"
 
 #: src/App.vue:48 src/components/feature-editor/FeatureEditor.vue:106
 #: src/components/feature-editor/FeatureEditor.vue:122
 #: src/components/feature-editor/GeometryEditor.vue:175
 msgid "No"
-msgstr "Nein"
+msgstr "No"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:138
 msgid "No Data"
-msgstr "Keine Daten"
+msgstr "Sense dades"
 
 #: src/components/attributes-table/TableView.vue:49
 msgid "No geometry"
-msgstr "Keine Geometrie"
+msgstr "Sense geometria"
 
 #: src/components/feature-editor/ImageInput.vue:75
 msgid "No image assigned"
-msgstr "Keine Bildzuordnung"
+msgstr "Sense imatge assignada"
 
 #: src/components/attributes-table/AttributeFilter.vue:275
 msgid "not empty"
-msgstr "nicht leer"
+msgstr "no buit"
 
 #: src/components/attributes-table/AttributeFilter.vue:268
 msgid "not equal to"
-msgstr "nicht gleich"
+msgstr "no igual a"
 
 #: src/components/attributes-table/AttributeFilter.vue:272
 msgid "not in"
-msgstr "nicht in"
+msgstr "no a"
 
 #: src/App.vue:27
 msgid "Not now"
-msgstr "Nicht jetzt"
+msgstr "Ara no"
 
 #: src/components/feature-editor/GenericEditForm.vue:116
 #: src/components/feature-editor/NumberField.vue:48
 msgid "Not valid integer number"
-msgstr "Ungültige Ganzzahl"
+msgstr "Nombre enter no vàlid"
 
 #: src/components/feature-editor/GenericEditForm.vue:115
 #: src/components/feature-editor/NumberField.vue:47
 msgid "Not valid number"
-msgstr "Ungültige Nummer"
+msgstr "Número no valid"
 
 #: src/ui/DatePicker.vue:182
 msgid "November"
-msgstr "November"
+msgstr "Novembre"
 
 #: src/components/attributes-table/AttributeFilter.vue:282
 msgid "Number"
-msgstr "Nummer"
+msgstr "Número"
 
 #: src/components/attributes-table/AttributeFilter.vue:284
 msgid "Number,Number"
-msgstr "Nummer,Nummer"
+msgstr "Número,Número"
 
 #: src/components/attributes-table/AttributeFilter.vue:283
 msgid "Number,Number,..."
-msgstr "Nummer,..."
+msgstr "Número,..."
 
 #: src/ui/DatePicker.vue:181
 msgid "October"
-msgstr "Oktober"
+msgstr "Octubre"
 
 #: src/components/attributes-table/AttributeFilter.vue:271
 msgid "one of"
-msgstr "einer von"
+msgstr "un de"
 
 #: src/components/content-panel/BaseLayerOpacity.vue:5
 msgid "Opacity of base layer"
-msgstr "Sichtbarkeit von Basisschichten"
+msgstr "Opacitat de la capa base"
 
 #: src/components/content-panel/OverlaysOpacity.vue:5
 msgid "Opacity of overlay layers"
-msgstr "Sichtbarkeit von Überlagerungsebenen"
+msgstr "Opacitaat de les capes de dades"
 
 #: src/ui/TextEditor.vue:352
 msgid "Ordered list"
-msgstr "Nummerierte Liste"
+msgstr "Llista numerada"
 
 #: src/components/print/Print.vue:114
 msgid "Output format"
-msgstr "Ausgabeformat"
+msgstr "Format de sortida"
 
 #: src/components/content-panel/ContentPanel.vue:108
 msgid "Overlay Layers"
-msgstr "Capes Informació"
+msgstr "Capes Dades"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:293
 #: src/components/attributes-table/TableView.vue:193
 msgid "Page size"
-msgstr "Anzahl der Zeilen"
+msgstr "Paginació"
 
 #: src/components/LoginDialog.vue:166
 msgid "Password"
-msgstr "Passwort"
+msgstr "Password"
 
 #: src/ui/TextEditor.vue:330
 msgid "Paste HTML"
-msgstr "HTML einfügen"
+msgstr "enganxa HTML"
 
 #: src/components/measure/Measure.vue:124
 msgid "Perimeter"
-msgstr "Perimeter"
+msgstr "Perimetre"
 
 #: src/components/AppMenu.vue:93
 msgid "Permalink"
@@ -604,138 +607,138 @@ msgstr "Permalink"
 
 #: src/components/LoginDialog.vue:20
 msgid "Permission denied"
-msgstr "Zugang verweigert"
+msgstr "Permis denegat"
 
 #: src/components/print/Preview.vue:12
 msgid "Print Preview"
-msgstr "Druckvorschau"
+msgstr "Previsualització impresió"
 
 #: src/components/print/Print.vue:116
 msgid "Print quality"
-msgstr "Druckqualität"
+msgstr "Qualitat impresió"
 
 #: src/components/feature-editor/MediaFileField.vue:224
 msgid "Project size limit reached"
-msgstr "Projektumfangsgrenze erreicht"
+msgstr "Project size limit reached"
 
 #: src/UserDashboard.vue:95
 msgid "Publish project"
-msgstr "Projekt veröffentlichen"
+msgstr "Publicar projecte"
 
 #: src/UserDashboard.vue:222
 msgid "Recent"
-msgstr "Zuletzt"
+msgstr "Recent"
 
 #: src/ui/TextEditor.vue:345
 msgid "Redo"
-msgstr "Wiederholen"
+msgstr "Refer"
 
 #: src/ui/TextEditor.vue:333
 msgid "Reset formatting"
-msgstr "Formatierung zurücksetzen"
+msgstr "Restablir format"
 
 #: src/components/LoginDialog.vue:58
 msgid "Reset Password"
-msgstr "Passwort zurücksetzen"
+msgstr "Restablir password"
 
 #: src/components/feature-editor/ImageInput.vue:145
 #: src/components/feature-editor/ImageInput.vue:23
 #: src/components/feature-editor/ImageInput.vue:58
 msgid "Resolution"
-msgstr "Auflösung"
+msgstr "Resolució"
 
 #: src/ui/DatePicker.vue:168
 msgid "Saturday"
-msgstr "Samstag"
+msgstr "Dissabte"
 
 #: src/components/feature-editor/FeatureEditor.vue:78
 msgid "Save changes"
-msgstr "Änderungen speichern"
+msgstr "Desar canvis"
 
 #: src/components/BottomToolbar.vue:6 src/components/print/Preview.vue:11
 msgid "Scale"
-msgstr "Skala"
+msgstr "Escala"
 
 #: src/components/SearchTool.vue:125
 msgid "Search address"
-msgstr "Adresse suchen"
+msgstr "Cercar adreça"
 
 #: src/components/SearchTool.vue:126
 msgid "Search location"
-msgstr "Standort suchen"
+msgstr "Cercar localització"
 
 #: src/components/feature-editor/MediaFileField.vue:59
 #: src/components/feature-editor/RelationWidget.vue:84
 msgid "Select"
-msgstr "Wählen"
+msgstr "Seleccionar"
 
 #: src/components/attributes-table/MobileAttributesTable.vue:380
 #: src/components/EditTool.vue:154
 msgid "Select layer"
-msgstr "Ebene wählen"
+msgstr "Selecciona Capa"
 
 #: src/components/feature-editor/GeometryEditor.vue:562
 msgid "Selected geometry was deleted"
-msgstr "Ausgewählte Geometrie wurde gelöscht"
+msgstr "S'ha esborrat la geometria seleccionada"
 
 #: src/ui/DatePicker.vue:180
 msgid "September"
-msgstr "September"
+msgstr "Setembre"
 
 #: src/IntroPage.vue:24
 msgid "Sign in"
-msgstr "Anmelden"
+msgstr "Entra"
 
 #: src/components/LoginDialog.vue:11
 msgid "Sign In to Continue"
-msgstr "Anmelden zum Fortfahren"
+msgstr "Entra per continuar"
 
 #: src/IntroPage.vue:34
 msgid "Sign up"
-msgstr "Registrieren"
+msgstr "Registra't"
 
 #: src/components/attributes-table/AttributeFilter.vue:265
 msgid "since"
-msgstr "seit"
+msgstr "des de"
 
 #: src/components/feature-editor/ImageInput.vue:141
 #: src/components/feature-editor/ImageInput.vue:19
 #: src/components/feature-editor/ImageInput.vue:55
 #: src/components/feature-editor/SimpleFileInput.vue:12
 msgid "Size"
-msgstr "Größe"
+msgstr "Mida"
 
 #: src/components/feature-editor/SnapTool.vue:10
 msgid "Snapping"
-msgstr "Schnappen"
+msgstr "Ajust "
 
 #: src/components/feature-editor/SnapTool.vue:22
 msgid "Snapping layers"
-msgstr "Ebenen zum Schnappen"
+msgstr "Ajustar Capes"
 
 #: src/ui/TextEditor.vue:349
 msgid "Strike"
-msgstr "Durchstreichen"
+msgstr "Tatxa"
 
 #: src/ui/DatePicker.vue:169
 msgid "Sunday"
-msgstr "Sonntag"
+msgstr "Diumenge"
 
 #: src/components/Identification.vue:155
 msgid "Table"
-msgstr "Tabelle"
+msgstr "Taula"
 
 #: src/components/Identification.vue:157
 msgid "Table & Info Panel"
-msgstr "Tabelle & Infopanel"
+msgstr "Taula i panell d'informació"
 
 #: src/ui/TextEditor.vue:355
 msgid "Text color"
-msgstr "Textfarbe"
+msgstr "Color de text"
 
 #: src/ui/TextEditor.vue:353
 msgid "Text size"
-msgstr "Textgröße"
+msgstr "Mida de text"
 
 #: src/components/attributes-table/AttributeFilter.vue:285
 msgid "Text,Text,..."
@@ -743,118 +746,118 @@ msgstr "Text,Text,..."
 
 #: src/ui/DatePicker.vue:166
 msgid "Thursday"
-msgstr "Donnerstag"
+msgstr "Dijous"
 
 #: src/components/content-panel/ContentPanel.vue:114
 msgid "Topics"
-msgstr "Themen"
+msgstr "Temes"
 
 #: src/components/measure/Measure.vue:78
 msgid "Total length"
-msgstr "Gesamtlänge"
+msgstr "Llarg total"
 
 #: src/ui/DatePicker.vue:164
 msgid "Tuesday"
-msgstr "Dienstag"
+msgstr "Dimarts"
 
 #: src/components/content-panel/LayersTree.vue:85
 msgid "Type"
-msgstr "Typ"
+msgstr "Tipus"
 
 #: src/components/feature-editor/SnapTool.vue:110
 msgid "Unable to retrieve snapping geometry."
-msgstr "Fanggeometrie kann nicht abgerufen werden."
+msgstr "Unable to retrieve snapping geometry."
 
 #: src/ui/TextEditor.vue:348
 msgid "Underline"
-msgstr "Unterstreichen"
+msgstr "Subrallat"
 
 #: src/components/feature-editor/GeometryEditor.vue:45
 #: src/components/feature-editor/GeometryEditor.vue:88
 #: src/ui/TextEditor.vue:344
 msgid "Undo"
-msgstr "Rückgängig"
+msgstr "Desfer"
 
 #: src/components/measure/Measure.vue:229
 msgid "Units"
-msgstr "Einheiten"
+msgstr "Unitats"
 
 #: src/ui/TextEditor.vue:351
 msgid "Unordered list"
-msgstr "Unnumerierte Liste"
+msgstr "Liista no ordenada"
 
 #: src/components/attributes-table/AttributeFilter.vue:266
 msgid "until"
-msgstr "bis"
+msgstr "fins"
 
 #: src/UserDashboard.vue:69
 msgid "Updated"
-msgstr "Aktualisiert"
+msgstr "Actualitzat"
 
 #: src/components/feature-editor/FeatureEditor.vue:92
 #: src/components/feature-editor/NewFeatureEditor.vue:48
 msgid "Updating data"
-msgstr "Daten werden aktualisiert"
+msgstr "Actualitzant dades"
 
 #: src/components/feature-editor/MediaFileField.vue:42
 msgid "Uploading"
-msgstr "Hochladen"
+msgstr "Pujant"
 
 #: src/UserDashboard.vue:86
 msgid ""
 "Use QGIS and Gisquick plugin to create your map, and then publish it from "
 "your profile page."
 msgstr ""
-"Verwenden Sie QGIS und das Gisquick-Plugin, um Ihre Karte zu erstellen, und "
-"veröffentlichen Sie sie dann auf Ihrer Profilseite."
+"Usa QGIS i el plugin de Gisquick per crear el teu propi mapa,i publica'l des de "
+"la plana del teu perfil."
 
 #: src/components/LoginDialog.vue:165
 msgid "Username / Email"
-msgstr "Benutzername / Email"
+msgstr "Usuari / Email"
 
 #: src/components/content-panel/LayersTree.vue:110
 msgid "Visit"
-msgstr "Besuch"
+msgstr "Visita"
 
 #: src/IntroPage.vue:10
 msgid "Web platform for publishing your maps from QGIS desktop"
 msgstr ""
-"Web-Plattform für die Veröffentlichung Ihrer Karten vom QGIS-Desktop aus"
+"Plataforma Web per publicar els teus mapes des de QGis escriptori"
 
 #: src/ui/DatePicker.vue:165
 msgid "Wednesday"
-msgstr "Mittwoch"
+msgstr "Dimecres"
 
 #: src/IntroPage.vue:9
 msgid "Welcome to the Gisquick"
-msgstr "Willkommen bei Gisquick"
+msgstr "Benvingut a Gisquick"
 
 #: src/App.vue:51 src/components/feature-editor/FeatureEditor.vue:109
 #: src/components/feature-editor/FeatureEditor.vue:125
 #: src/components/feature-editor/GeometryEditor.vue:178
 msgid "Yes"
-msgstr "Ja"
+msgstr "Si"
 
 #: src/UserDashboard.vue:85
 msgid "You didn't publish any project yet!"
-msgstr "Sie haben noch kein Projekt veröffentlicht!"
+msgstr "No has publicat cap projecte encara!"
 
 #: src/components/feature-editor/SnapTool.vue:109
 msgid ""
 "You have reached the geometry snapping limit. Please zoom in to a smaller "
 "map area."
 msgstr ""
-"Sie haben das Limit für die Geometrieerfassung erreicht. Bitte zoomen Sie "
-"auf einen kleineren Kartenbereich."
+"You have reached the geometry snapping limit. Please zoom in to a smaller "
+"map area."
 
 #: src/components/attributes-table/MobileAttributesTable.vue:342
 msgid "Zoom to"
-msgstr "Zoom bis"
+msgstr "Zoom a"
 
 #: src/AppNotifications.vue:16
 msgctxt "adverb"
 msgid "Next"
-msgstr "Weiter"
+msgstr "Següent"
 
 #: src/components/MapTools.vue:136
 msgctxt "noun"
@@ -869,24 +872,24 @@ msgstr "Identifikation"
 #: src/components/MapTools.vue:82
 msgctxt "noun"
 msgid "Measure"
-msgstr "Messung"
+msgstr "Mesura"
 
 #: src/components/MapTools.vue:91
 msgctxt "noun"
 msgid "Print"
-msgstr "Drucken"
+msgstr "Imprimeix"
 
 #: src/UserDashboard.vue:211
 msgctxt "noun"
 msgid "Search"
-msgstr "Suche"
+msgstr "Cerca"
 
 #: src/UserDashboard.vue:112 src/UserDashboard.vue:226
 msgctxt "verb"
 msgid "Open"
-msgstr "Öffnen"
+msgstr "Obrir"
 
 #: src/App.vue:30
 msgctxt "verb"
 msgid "Update"
-msgstr "Aktualisierung"
+msgstr "Actualitzar"
