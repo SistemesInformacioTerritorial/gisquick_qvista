@@ -70,6 +70,7 @@ Vue.component('generic-infopanel', GenericInfopanel)
 Vue.prototype.$http = http
 
 function createApp (data) {
+
   store.commit('app', data.app)
   store.commit('user', data.user)
   const vm = new Vue({
@@ -77,17 +78,19 @@ function createApp (data) {
     // render: h => null
     render: h => h(App)
   })
-  let lang = localStorage.getItem('gisquick:language') || data.app.lang
-  if (!lang && data.app.languages) {
-    const appLangs = data.app.languages.map(l => l.code)
-    for (const l of navigator.languages) {
-      const match = appLangs.find(al => al.toLowerCase() === l.toLowerCase())
-      if (match) {
-        lang = match
-        break
-      }
-    }
-  }
+  //set lang to catalan always
+  let lang = 'ca'
+  // let lang = localStorage.getItem('gisquick:language') || data.app.lang
+  // if (!lang && data.app.languages) {
+  //   const appLangs = data.app.languages.map(l => l.code)
+  //   for (const l of navigator.languages) {
+  //     const match = appLangs.find(al => al.toLowerCase() === l.toLowerCase())
+  //     if (match) {
+  //       lang = match
+  //       break
+  //     }
+  //   }
+  // }
   if (lang) {
     vm.$language.current = lang
     document.documentElement.setAttribute('lang', lang.split('-')[0])
