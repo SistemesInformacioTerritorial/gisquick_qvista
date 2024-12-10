@@ -29,7 +29,7 @@
     color: var(--qvista-color-grey-1);
     padding: 10px;
     font-size: 18px;
-    font-weight: bold;
+
     position: relative;
   }
   
@@ -43,13 +43,13 @@
   .logo {
     width: 30px;
     height: 30px;
-    margin-right: 20px;
+    margin-right: 5px;
   }
   
   .text-logo {
     font-size: 18px;
     font-weight: bold;
-    margin-left: 35px;
+    margin-left: 5px;
   }
   
   .map-name {
