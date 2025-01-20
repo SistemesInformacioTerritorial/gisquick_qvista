@@ -104,7 +104,8 @@ export default {
       return this.project.config.search ?? {}
     },
     enabled () {
-      return this.config.geocoding_api || this.config.search_by_coords
+     // return this.config.geocoding_api || this.config.search_by_coords
+      return true // always enabled 
     },
     service () {
       const name = this.config.geocoding_api
@@ -128,6 +129,26 @@ export default {
     }
   },
   methods: {
+    loadExternalScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script ${src}`));
+        document.head.appendChild(script);
+      });
+    },
+    async useExternalLibrary() {
+      try {
+        const externalLibrary = await this.loadExternalScript('https://www.barcelona.cat/estatics/geobcn/1.2/api-full-ca.js');
+        // Now you can use the functions from the external library
+        console.log("External library loaded",externalLibrary);
+        const result = new geoBCN.Html.InputAutocomplete({});
+        console.log("No error",result);
+      } catch (error) {
+        console.error(error);
+      }
+    },
     clear () {
       this.feature = null
       this.result = null
@@ -142,6 +163,7 @@ export default {
       } else {
         this.clear()
         // this.$refs.autocomplete?.clear()
+        this.useExternalLibrary();
       }
     },
     arcgisService () {
