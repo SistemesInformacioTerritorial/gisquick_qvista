@@ -18,11 +18,13 @@
         :items="suggestions"
         highlight-fields="text"
         :value="result"
+        id="cerca"
         @input="onInput"
         @text:update="onTextChangeDebounced"
         @keydown.enter="onEnter"
         @clear="clear"
-      >
+      > 
+   
         <template v-slot:item="{ html }">
           <div class="item f-row f-grow">
             <div class="f-grow">
@@ -37,12 +39,14 @@
           </div>
         </template>
       </v-autocomplete>
+              
       <features-viewer :features="features"/>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import { mapState } from 'vuex'
 import debounce from 'lodash/debounce'
 import Point from 'ol/geom/Point'
@@ -50,6 +54,7 @@ import Feature from 'ol/Feature'
 import { toLonLat, fromLonLat, transformExtent } from 'ol/proj'
 import VAutocomplete from '@/ui/Autocomplete.vue'
 import FeaturesViewer from '@/components/ol/FeaturesViewer.vue'
+
 
 const HDMSRegex = /^(\d{1,2})°\s*(\d{1,2})['′]\s*(\d{1,2}(?:\.\d{1})?)[\"″]\s*([NS])\s*(\d{1,3})°\s*(\d{1,2})['′]\s*(\d{1,2}(?:\.\d{1})?)[\"″]\s*([EW])$/
 const LonLatRegex = /^\s*(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/
@@ -95,7 +100,9 @@ export default {
       expanded: false,
       loading: false,
       error: '',
-      result: null
+      result: null,
+   //   results: [],
+     // search: '',
     }
   },
   computed: {
@@ -108,10 +115,12 @@ export default {
       return true // always enabled 
     },
     service () {
-      const name = this.config.geocoding_api
+      const name = 'barcelona' // always use barcelona service
+      //const name = this.config.geocoding_api
       switch (name) {
         case 'arcgis': return this.arcgisService()
         case 'geoapify': return this.geoapifyService()
+        case 'barcelona': return this.barcelonaService()
       }
       return null
     },
@@ -129,26 +138,13 @@ export default {
     }
   },
   methods: {
-    loadExternalScript(src) {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load script ${src}`));
-        document.head.appendChild(script);
-      });
-    },
-    async useExternalLibrary() {
-      try {
-        const externalLibrary = await this.loadExternalScript('https://www.barcelona.cat/estatics/geobcn/1.2/api-full-ca.js');
-        // Now you can use the functions from the external library
-        console.log("External library loaded",externalLibrary);
-        const result = new geoBCN.Html.InputAutocomplete({});
-        console.log("No error",result);
-      } catch (error) {
-        console.error(error);
-      }
-    },
+    
+    selectResult(result) {
+      this.text = result;
+      this.results = [];
+    } ,
+    
+    
     clear () {
       this.feature = null
       this.result = null
@@ -160,11 +156,124 @@ export default {
         this.$nextTick(() => {
           this.$refs.autocomplete.focus()
         })
+      // this.useExternalLibrary();
       } else {
         this.clear()
         // this.$refs.autocomplete?.clear()
-        this.useExternalLibrary();
+        
       }
+    },
+   
+    async suggest (text) {
+      return await this.service.autocomplete(text)
+    },
+   
+   
+    async onInput (item) {
+      if (this.result !== item) {
+        this.feature = item ? Object.freeze(await this.service.getFeature(item)) : null
+        console.log("item a l'onInput", item);
+        this.result = item
+      }
+      if (this.feature) {
+        this.$map.ext.zoomToFeature(this.feature)
+        
+      }
+    },
+    onTextChangeDebounced: debounce(async function (text) {
+      this.onTextChange(text)
+    }, 400),
+    async onTextChange (text) {
+      if (text.length > 0) {
+        if (!this.service) return
+        this.loading = true
+        this.error = ''
+        try {
+          this.suggestions = await this.suggest(text)
+        } catch (err) {
+          this.error = err.message || this.$gettext('Error')
+        } finally {
+          this.loading = false
+        }
+      } else {
+        this.suggestions = []
+      }
+    },
+    searchByCoords (text) {
+      let coords
+      if (HDMSRegex.test(text)) {
+        try {
+          coords = parseHDMS(text)
+        } catch (err) {}
+      } else if (LonLatRegex.test(text)) {
+        coords = text.split(',').map(parseFloat).reverse()
+      }
+      if (coords) {
+        const p = new Point(fromLonLat(coords, this.$map.getView().getProjection()))
+        const f = new Feature({ geometry: p })
+        this.feature = Object.freeze(f)
+        this.$map.ext.zoomToFeature(this.feature)
+      }
+    },
+    onEnter (e) {
+      if (this.config.search_by_coords) {
+        this.searchByCoords(e.target.value)
+      }
+    },
+     barcelonaService() {
+      return {
+        autocomplete: async (text) => {
+          const [x, y] = this.$map.getView().getCenter()
+          const [lon, lat] = toLonLat([x, y], this.$map.getView().getProjection())
+          const projection = this.$map.getView().getProjection()
+          
+          console.log("centre del mapa", x, y, lon, lat, projection);
+       //   const viewExtent = this.$map.getView().calculateExtent()
+       
+        const response = await axios.get(`https://w33.bcn.cat/geoBCN/serveis/territori?q=${text}&max=8&out_proj=EPSG:4326`);
+   
+           const suggestions = response.data.resultats.adreces
+            suggestions.forEach(i => {
+
+            
+          //   i.text = i.formatted
+          //   i.geom = new Point(fromLonLat([i.lon, i.lat], this.$map.getView().getProjection()))
+          // })
+
+
+              i.text = i.nomComplet
+              /*localitzacio: {?} ?proj: "EPSG:25831" x: 428599.844 y: 4581106.36               */
+              i.geom = new Point(fromLonLat([i.localitzacio.x, i.localitzacio.y], this.$map.getView().getProjection()))
+
+              
+
+
+              console.log("informacio de la suggestion x= ", i.localitzacio.x, " y= ", i.localitzacio.y, " proj= ", i.localitzacio.proj); 
+                      })
+
+                      //print all suggestions
+          console.log("informacio de totes les suggestions", suggestions);
+
+            return Object.freeze(suggestions)
+          },
+          getFeature: async (item) => {
+            console.log('retornant item amb coordenades', item.geom);
+            console.dir(item.geom);
+            return new Feature({ geometry: item.geom })
+
+          }
+        } 
+      
+      
+      
+      
+      // try {
+      //             const response = await axios.get(`https://w33.bcn.cat/geoBCN/serveis/territori?q=${query}&max=8`);
+      //             return response.data.resultats.adreces;
+      //           } catch (error) {
+      //             console.error(error);
+      //             throw new Error('Error fetching data from Barcelona service');
+      //           }
     },
     arcgisService () {
       const wkid = this.project.config.projection.split(':')?.[1]
@@ -246,6 +355,7 @@ export default {
             i.text = i.formatted
             i.geom = new Point(fromLonLat([i.lon, i.lat], this.$map.getView().getProjection()))
           })
+          
           return Object.freeze(suggestions)
         },
         getFeature: async (item) => {
@@ -253,59 +363,7 @@ export default {
         }
       }
     },
-    async suggest (text) {
-      return await this.service.autocomplete(text)
-    },
-    async onInput (item) {
-      if (this.result !== item) {
-        this.feature = item ? Object.freeze(await this.service.getFeature(item)) : null
-        this.result = item
-      }
-      if (this.feature) {
-        this.$map.ext.zoomToFeature(this.feature)
-      }
-    },
-    onTextChangeDebounced: debounce(async function (text) {
-      this.onTextChange(text)
-    }, 400),
-    async onTextChange (text) {
-      if (text.length > 0) {
-        if (!this.service) return
-        this.loading = true
-        this.error = ''
-        try {
-          this.suggestions = await this.suggest(text)
-        } catch (err) {
-          this.error = err.message || this.$gettext('Error')
-        } finally {
-          this.loading = false
-        }
-      } else {
-        this.suggestions = []
-      }
-    },
-    searchByCoords (text) {
-      let coords
-      if (HDMSRegex.test(text)) {
-        try {
-          coords = parseHDMS(text)
-        } catch (err) {}
-      } else if (LonLatRegex.test(text)) {
-        coords = text.split(',').map(parseFloat).reverse()
-      }
-      if (coords) {
-        const p = new Point(fromLonLat(coords, this.$map.getView().getProjection()))
-        const f = new Feature({ geometry: p })
-        this.feature = Object.freeze(f)
-        this.$map.ext.zoomToFeature(this.feature)
-      }
-    },
-    onEnter (e) {
-      if (this.config.search_by_coords) {
-        this.searchByCoords(e.target.value)
-      }
-    }
-  }
+  },
 }
 </script>
 
