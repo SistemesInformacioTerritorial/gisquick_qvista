@@ -182,7 +182,7 @@ export default {
 
 .map-container {
   width: 100%;
-  height: 100vh;
+  height: 95vh;
   max-height: 100vh;
   overflow: hidden;
   position: relative;
