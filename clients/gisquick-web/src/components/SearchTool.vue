@@ -54,6 +54,7 @@ import Feature from 'ol/Feature'
 import { toLonLat, fromLonLat, transformExtent } from 'ol/proj'
 import VAutocomplete from '@/ui/Autocomplete.vue'
 import FeaturesViewer from '@/components/ol/FeaturesViewer.vue'
+import { el } from 'date-fns/locale';
 
 
 const HDMSRegex = /^(\d{1,2})°\s*(\d{1,2})['′]\s*(\d{1,2}(?:\.\d{1})?)[\"″]\s*([NS])\s*(\d{1,3})°\s*(\d{1,2})['′]\s*(\d{1,2}(?:\.\d{1})?)[\"″]\s*([EW])$/
@@ -172,7 +173,6 @@ export default {
     async onInput (item) {
       if (this.result !== item) {
         this.feature = item ? Object.freeze(await this.service.getFeature(item)) : null
-        console.log("item a l'onInput", item);
         this.result = item
       }
       if (this.feature) {
@@ -232,8 +232,26 @@ export default {
        
         const response = await axios.get(`https://w33.bcn.cat/geoBCN/serveis/territori?q=${text}&max=8&out_proj=EPSG:4326`);
    
-           const suggestions = response.data.resultats.adreces
-            suggestions.forEach(i => {
+         let suggestions = response.data.resultats.adreces
+         const carrers = response.data.resultats.vies
+         let isAdreca = false
+          //if text ends with a number, we assume it is adreça
+          if(text.match(/\d+$/))       isAdreca = true
+
+         if(carrers.length > 1 && !isAdreca) {
+           suggestions = carrers
+         }else if(suggestions.length === 1 && carrers && carrers.length > 1) {
+          //agreguem el  carrer  a les suggestions 
+          suggestions = suggestions.concat(carrers)
+
+           
+         }
+         
+         ////console.log("carrers", carrers);
+         console.log("suggestions", suggestions);
+           
+         
+         suggestions.forEach(i => {
 
             
           //   i.text = i.formatted
@@ -248,17 +266,19 @@ export default {
               
 
 
-              console.log("informacio de la suggestion x= ", i.localitzacio.x, " y= ", i.localitzacio.y, " proj= ", i.localitzacio.proj); 
+             //console.log("informacio de la suggestion x= ", i.localitzacio.x, " y= ", i.localitzacio.y, " proj= ", i.localitzacio.proj); 
                       })
 
                       //print all suggestions
-          console.log("informacio de totes les suggestions", suggestions);
+          //console.log("informacio de totes les suggestions", suggestions);
 
             return Object.freeze(suggestions)
           },
           getFeature: async (item) => {
-            console.log('retornant item amb coordenades', item.geom);
-            console.dir(item.geom);
+           // console.log('retornant item amb coordenades', item.geom);
+           // console.dir(item.geom);
+           //set text to the selected item
+            this.text = item.text;
             return new Feature({ geometry: item.geom })
 
           }
