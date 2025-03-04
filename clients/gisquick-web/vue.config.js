@@ -57,7 +57,8 @@ module.exports = defineConfig({
     },
     proxy: {
       '^/api': {
-        //target: 'http://localhost',
+       // target: 'http://localhost:4000', // local server
+       // target: 'http://localhost',
         target: 'https://gisquick.nexusgeografics.com/',
         onProxyReq (proxyReq, req) {
           // restream body when body-parser was used
