@@ -813,7 +813,7 @@ msgstr ""
 
 #: src/components/LoginDialog.vue:165
 msgid "Username / Email"
-msgstr "Usuari / Email"
+msgstr "Usuari"
 
 #: src/components/content-panel/LayersTree.vue:110
 msgid "Visit"
@@ -830,7 +830,7 @@ msgstr "Dimecres"
 
 #: src/IntroPage.vue:9
 msgid "Welcome to the Gisquick"
-msgstr "Benvingut a Gisquick"
+msgstr "Benvingut a qVistaWeb"
 
 #: src/App.vue:51 src/components/feature-editor/FeatureEditor.vue:109
 #: src/components/feature-editor/FeatureEditor.vue:125

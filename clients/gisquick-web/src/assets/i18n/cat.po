@@ -62,12 +62,8 @@ msgid "All visible layers"
 msgstr "Totes les capes visibles"
 
 #: src/IntroPage.vue:19
-msgid ""
-"Already registered? You can continue with Sign In to see list of\n"
-"your projects"
-msgstr ""
-"Ja està enregistrat? pots continuar amb el Login per veure la llista\n"
-"dels teus projectes"
+msgid "Already registered? You can continue with Sign In to see list of your projects"
+msgstr "Ja està enregistrat? pots continuar amb el Login per veure la llista dels teus projectes"
 
 #: src/components/feature-editor/ImageInput.vue:152
 msgid "Apply"

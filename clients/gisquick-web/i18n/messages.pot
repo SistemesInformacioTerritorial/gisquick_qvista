@@ -51,12 +51,6 @@ msgstr ""
 msgid "All visible layers"
 msgstr ""
 
-#: ./src/IntroPage.vue:19
-msgid ""
-"Already registered? You can continue with Sign In to see list of\n"
-"your projects"
-msgstr ""
-
 #: ./src/components/feature-editor/ImageInput.vue:152
 msgid "Apply"
 msgstr ""
@@ -84,10 +78,6 @@ msgstr ""
 
 #: ./src/components/LoginDialog.vue:25
 msgid "Authentication failed"
-msgstr ""
-
-#: ./src/components/LoginDialog.vue:110
-msgid "Back to Login"
 msgstr ""
 
 #: src/ui/TextEditor.vue:354
@@ -138,6 +128,10 @@ msgstr ""
 
 #: ./src/components/content-panel/ContentPanel.vue:4
 msgid "Content"
+msgstr ""
+
+#: ./src/IntroPage.vue:20
+msgid "Continua per accedir als teus mapes i projectes"
 msgstr ""
 
 #: ./src/components/LoginDialog.vue:103
@@ -232,11 +226,11 @@ msgstr ""
 msgid "Edit value manually"
 msgstr ""
 
-#: src/components/LoginDialog.vue:167
+#: src/components/LoginDialog.vue:171
 msgid "Email"
 msgstr ""
 
-#: src/components/LoginDialog.vue:172
+#: src/components/LoginDialog.vue:176
 msgid "Email was sent to given email address."
 msgstr ""
 
@@ -244,7 +238,7 @@ msgstr ""
 msgid "empty"
 msgstr ""
 
-#: src/components/LoginDialog.vue:168
+#: src/components/LoginDialog.vue:172
 msgid "Enter your email address below and we will email instructions for setting a new password."
 msgstr ""
 
@@ -256,7 +250,7 @@ msgstr ""
 #: ./src/components/content-panel/JsonLegend.vue:12
 #: src/components/feature-editor/FeatureEditor.vue:255
 #: src/components/feature-editor/NewFeatureEditor.vue:129
-#: src/components/SearchTool.vue:257
+#: src/components/SearchTool.vue:194
 #: src/ui/ListTable.vue:105
 #: src/ui/Table.vue:211
 msgid "Error"
@@ -271,7 +265,7 @@ msgstr ""
 msgid "Failed to load data"
 msgstr ""
 
-#: src/components/LoginDialog.vue:171
+#: src/components/LoginDialog.vue:175
 msgid "Failed to process your request."
 msgstr ""
 
@@ -305,10 +299,6 @@ msgstr ""
 #: src/components/attributes-table/MobileAttributesTable.vue:382
 #: src/components/attributes-table/TableView.vue:192
 msgid "Filter to visible area"
-msgstr ""
-
-#: ./src/components/LoginDialog.vue:111
-msgid "Forgot password?"
 msgstr ""
 
 #: ./src/components/feature-editor/ImageInput.vue:15
@@ -474,12 +464,6 @@ msgstr ""
 msgid "New Feature"
 msgstr ""
 
-#: ./src/IntroPage.vue:29
-msgid ""
-"New to Gisquick? Create a new account if you want to publish your\n"
-"own maps!"
-msgstr ""
-
 #: ./src/App.vue:49
 #: ./src/components/feature-editor/FeatureEditor.vue:106
 #: ./src/components/feature-editor/FeatureEditor.vue:122
@@ -578,7 +562,7 @@ msgstr ""
 msgid "Page size"
 msgstr ""
 
-#: src/components/LoginDialog.vue:166
+#: src/components/LoginDialog.vue:170
 msgid "Password"
 msgstr ""
 
@@ -649,11 +633,11 @@ msgstr ""
 msgid "Scale"
 msgstr ""
 
-#: src/components/SearchTool.vue:125
+#: src/components/SearchTool.vue:136
 msgid "Search address"
 msgstr ""
 
-#: src/components/SearchTool.vue:126
+#: src/components/SearchTool.vue:137
 msgid "Search location"
 msgstr ""
 
@@ -681,10 +665,6 @@ msgstr ""
 
 #: ./src/components/LoginDialog.vue:11
 msgid "Sign In to Continue"
-msgstr ""
-
-#: ./src/IntroPage.vue:34
-msgid "Sign up"
 msgstr ""
 
 #: src/components/attributes-table/AttributeFilter.vue:265
@@ -797,7 +777,7 @@ msgstr ""
 msgid "Use QGIS and Gisquick plugin to create your map, and then publish it from your profile page."
 msgstr ""
 
-#: src/components/LoginDialog.vue:165
+#: src/components/LoginDialog.vue:169
 msgid "Username / Email"
 msgstr ""
 
@@ -805,7 +785,7 @@ msgstr ""
 msgid "Visit"
 msgstr ""
 
-#: ./src/IntroPage.vue:10
+#: ./src/IntroPage.vue:11
 msgid "Web platform for publishing your maps from QGIS desktop"
 msgstr ""
 
@@ -813,7 +793,7 @@ msgstr ""
 msgid "Wednesday"
 msgstr ""
 
-#: ./src/IntroPage.vue:9
+#: ./src/IntroPage.vue:10
 msgid "Welcome to the Gisquick"
 msgstr ""
 

@@ -7,7 +7,7 @@
       <div class="content f-col-ac">
         <div class="card dark">
           <div class="login-header f-col-ac">
-            <img class="logo my-2" :src="images.textLogo"/>
+            <img class="logo my-2" src="@/assets/qvistaweb.svg"/>
             <h1><translate>Sign In to Continue</translate></h1>
           </div>
 
@@ -103,14 +103,14 @@
               <translate>Continue as Guest</translate>
             </v-btn>
             <div class="f-grow"/>
-            <v-btn
+            <!-- <v-btn
               v-if="passwordResetUrl"
               @click="forgotPassword = !forgotPassword"
             >
               <translate v-if="forgotPassword">Back to Login</translate>
               <translate v-else key="forgot">Forgot password?</translate>
-            </v-btn>
-          </div>
+            </v-btn> -->
+          </div> 
         </div>
       </div>
       <div class="bg-logo" :style="images.imgLogoStyle"/>
@@ -148,12 +148,16 @@ export default {
   computed: {
     images () {
       const config = this.project?.config?.app || {}
-      const logoImg = config.logo || require('../assets/image_logo.svg')
+      //const logoImg = config.logo || require('../assets/image_logo.svg')
+      const logoImg = config.logo || require('../assets/qvista-cub.svg')
+     
       return {
         textLogo: config.text_logo_dark || config.text_logo || require('../assets/text_logo_dark.svg'),
-        imgLogoStyle: {
-          'background-image': `url(${logoImg})`,
-          ...config.login_logo_style
+       
+       
+       imgLogoStyle: {
+            'background-image': `url(${logoImg})`,
+            
         }
       }
     },
@@ -162,7 +166,7 @@ export default {
     },
     tr () {
       return {
-        Login: this.$gettext('Username / Email'),
+        Login: this.$gettext('Username / Email')+'',
         Password: this.$gettext('Password'),
         Email: this.$gettext('Email'),
         PasswordResetInfo: this.$gettext(
@@ -271,7 +275,8 @@ form {
     background-repeat: no-repeat;
     background-position-x: left;
     background-position-y: center;
-    background-size: auto clamp(640px, 90vh, 900px);
+    //background-size: auto clamp(640px, 90vh, 900px);
+    background-size: auto clamp(320px, 50vh, 640px);
     @media (max-width: 760px) {
       display: none;
     }

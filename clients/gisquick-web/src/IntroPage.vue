@@ -2,8 +2,9 @@
   <div class="page f-grow">
     <template v-if="!userSignedIn && !dashboardOnly">
       <div class="header f-col-ac f-justify-center px-2 shadow-2">
-        <!-- <img src="./assets/text_logo_dark.svg" class="logo my-4"/> -->
-        <svg-logo class="logo my-4"/>
+        <img src="./assets/qvistaweb.svg" class="logo my-4"/> 
+        <!-- <svg-logo class="logo my-4"/> -->
+        @/assets/qvista 1.svg
       </div>
       <div class="main f-col-ac f-justify-center light">
         <translate tag="h1" class="my-4"> Welcome to the Gisquick </translate>
@@ -17,29 +18,25 @@
         <div class="sign-info">
           <div class="section f-col mx-2 my-4">
             <translate class="text--secondary mb-4">
-              Already registered? You can continue with Sign In to see list of
-              your projects
+              Continua per accedir als teus mapes i projectes
             </translate>
             <v-btn color="#444" @click="showLogin">
               <translate>Sign in</translate>
             </v-btn>
-          </div>
-          <div class="divider"/>
-          <div class="section f-col mx-2 my-4">
+            </div>
+            <div class="divider"/>
+            <div class="section f-col mx-2 my-4">
             <translate class="text--secondary mb-4">
-              New to Gisquick? Create a new account if you want to publish your
-              own maps!
+              Powered by
             </translate>
-            <v-btn color="primary" href="/accounts/signup/">
-              <translate>Sign up</translate>
-            </v-btn>
-          </div>
+            <img src="./assets/text_logo.svg" class="logo my-4" alt="Gisquick Logo"/>
+            </div>
         </div>
       </div>
     </template>
     <template v-else>
       <div class="header-small f-col-ac f-justify-center p-2 shadow-2">
-        <svg-logo class="my-2" height="32"/>
+        <img src="@/assets/qvistaweb.svg" class="my-2" height="32"/>
       </div>
       <user-dashboard class="f-col f-grow"/>
     </template>
