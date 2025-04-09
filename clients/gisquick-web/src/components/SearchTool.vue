@@ -8,6 +8,14 @@
       <v-icon name="magnifier"/>
     </v-btn>
     <div v-if="expanded" class="toolbar f-row-ac">
+      <!-- Selector de tipo de búsqueda -->
+      <v-select
+        v-if="hasThematicSearch"
+        class="search-type-select flat inline"
+        :items="searchTypes"
+        v-model="selectedSearchType"
+        @input="onSearchTypeChange"
+      />
       <v-autocomplete
         ref="autocomplete"
         :placeholder="placeholder"
@@ -24,7 +32,6 @@
         @keydown.enter="onEnter"
         @clear="clear"
       > 
-   
         <template v-slot:item="{ html }">
           <div class="item f-row f-grow">
             <div class="f-grow">
@@ -39,7 +46,6 @@
           </div>
         </template>
       </v-autocomplete>
-              
       <features-viewer :features="features"/>
     </div>
   </div>
@@ -56,37 +62,60 @@ import VAutocomplete from '@/ui/Autocomplete.vue'
 import FeaturesViewer from '@/components/ol/FeaturesViewer.vue'
 import { el } from 'date-fns/locale';
 
-
 const HDMSRegex = /^(\d{1,2})°\s*(\d{1,2})['′]\s*(\d{1,2}(?:\.\d{1})?)[\"″]\s*([NS])\s*(\d{1,3})°\s*(\d{1,2})['′]\s*(\d{1,2}(?:\.\d{1})?)[\"″]\s*([EW])$/
 const LonLatRegex = /^\s*(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/
 
 function parseHDMS (input) {
-  // Split the input string into latitude and longitude parts
   const parts = input.split(/[°'"′″\s]+/)
-
-  // Extract the degree, minute, and second parts for latitude and longitude
   const latDegrees = parseFloat(parts[0])
   const latMinutes = parseFloat(parts[1])
   const latSeconds = parseFloat(parts[2])
-
   const lonDegrees = parseFloat(parts[4])
   const lonMinutes = parseFloat(parts[5])
   const lonSeconds = parseFloat(parts[6])
-
-  // Determine the hemisphere (N/S for latitude, E/W for longitude)
   const latHemisphere = parts[3]
   const lonHemisphere = parts[7]
-
-  // Calculate the latitude and longitude in decimal degrees
   const latitude = latDegrees + latMinutes / 60 + latSeconds / 3600
   const longitude = lonDegrees + lonMinutes / 60 + lonSeconds / 3600
-
-  // Adjust the latitude and longitude based on the hemisphere
   const finalLatitude = latHemisphere === 'S' ? -latitude : latitude
   const finalLongitude = lonHemisphere === 'W' ? -longitude : longitude
-
   return [finalLongitude, finalLatitude]
 }
+
+// Añadir este objeto de configuración en el frontend
+const THEMATIC_SEARCHES_CONFIG = {
+  'castanyeres': {
+    name: 'Castanyeres',
+    url: 'https://w33.bcn.cat/geoBCN/serveis/territori_tematic',
+    params: {
+      tipus: 'castanya'
+    },
+    resultPath: 'castanyeres',
+    textField: 'nom',
+    coordsPath: 'posicio'
+  },
+  'farmacies': {
+    name: 'Farmàcies',
+    url: 'https://w33.bcn.cat/geoBCN/serveis/equipaments',
+    params: {
+      tipus: 'farmacia'
+    },
+    resultPath: 'equipaments'
+  },
+  'escoles': {
+    name: 'Escoles',
+    url: 'https://w33.bcn.cat/geoBCN/serveis/equipaments',
+    params: {
+      tipus: 'escola'
+    },
+    resultPath: 'equipaments'
+  }
+};
+
+// Simular la variable "cerca" desde el servidor
+const MOCK_SERVER_CONFIG = {
+  cerca: 'castanyeres' // Cambia este valor para probar diferentes búsquedas temáticas
+};
 
 export default {
   name: 'search',
@@ -102,26 +131,39 @@ export default {
       loading: false,
       error: '',
       result: null,
-   //   results: [],
-     // search: '',
+      selectedSearchType: 'normal',
+      searchTypes: [
+        { value: 'normal', text: this.$gettext('Carrers') }
+      ]
     }
   },
   computed: {
     ...mapState(['project']),
     config () {
-      return this.project.config.search ?? {}
+      // Fusionar la configuración del proyecto con el mock para simular la variable "cerca"
+      return {
+        ...(this.project?.config?.search || {}),
+        ...(this.project?.config || {}),
+        ...MOCK_SERVER_CONFIG
+      }
     },
     enabled () {
-     // return this.config.geocoding_api || this.config.search_by_coords
-      return true // always enabled 
+      return true
+    },
+    hasThematicSearch() {
+      // Verificar si hay una búsqueda temática especificada en la variable "cerca"
+      return this.config.cerca && THEMATIC_SEARCHES_CONFIG[this.config.cerca];
     },
     service () {
-      const name = 'barcelona' // always use barcelona service
-      //const name = this.config.geocoding_api
-      switch (name) {
-        case 'arcgis': return this.arcgisService()
-        case 'geoapify': return this.geoapifyService()
-        case 'barcelona': return this.barcelonaService()
+      if (this.selectedSearchType === 'normal') {
+        const name = 'barcelona'
+        switch (name) {
+          case 'arcgis': return this.arcgisService()
+          case 'geoapify': return this.geoapifyService()
+          case 'barcelona': return this.barcelonaService()
+        }
+      } else {
+        return this.thematicSearchService(this.selectedSearchType);
       }
       return null
     },
@@ -138,14 +180,14 @@ export default {
       }
     }
   },
+  mounted() {
+    this.initThematicSearch();
+  },
   methods: {
-    
     selectResult(result) {
       this.text = result;
       this.results = [];
-    } ,
-    
-    
+    },
     clear () {
       this.feature = null
       this.result = null
@@ -157,19 +199,13 @@ export default {
         this.$nextTick(() => {
           this.$refs.autocomplete.focus()
         })
-      // this.useExternalLibrary();
       } else {
         this.clear()
-        // this.$refs.autocomplete?.clear()
-        
       }
     },
-   
     async suggest (text) {
       return await this.service.autocomplete(text)
     },
-   
-   
     async onInput (item) {
       if (this.result !== item) {
         this.feature = item ? Object.freeze(await this.service.getFeature(item)) : null
@@ -177,7 +213,6 @@ export default {
       }
       if (this.feature) {
         this.$map.ext.zoomToFeature(this.feature)
-        
       }
     },
     onTextChangeDebounced: debounce(async function (text) {
@@ -220,80 +255,99 @@ export default {
         this.searchByCoords(e.target.value)
       }
     },
-     barcelonaService() {
+    initThematicSearch() {
+      // Verificar si hay una búsqueda temática en la configuración
+      const cercaValue = this.config.cerca;
+      
+      if (cercaValue && THEMATIC_SEARCHES_CONFIG[cercaValue]) {
+        // Establecer el tipo de búsqueda temática por defecto
+        this.selectedSearchType = cercaValue;
+        
+        // Añadir la búsqueda temática al selector
+        this.searchTypes.push({
+          value: cercaValue,
+          text: THEMATIC_SEARCHES_CONFIG[cercaValue].name
+        });
+        
+        console.log(`Búsqueda temática configurada: ${cercaValue}`);
+      }
+    },
+    onSearchTypeChange() {
+      this.clear();
+    },
+    thematicSearchService(searchTypeId) {
+      // Obtener la configuración del objeto local, no del servidor
+      const searchConfig = THEMATIC_SEARCHES_CONFIG[searchTypeId];
+      
+      if (!searchConfig) return null;
+      
+      return {
+        autocomplete: async (text) => {
+          try {
+            const response = await axios.get(searchConfig.url, {
+              params: {
+                q: text,
+                max: 8,
+                out_proj: "EPSG:4326",
+                ...searchConfig.params
+              }
+            });
+            
+            // Procesar los resultados según la configuración
+            let suggestions = [];
+            if (response.data && response.data.resultats) {
+              suggestions = searchConfig.resultPath 
+                ? response.data.resultats[searchConfig.resultPath] 
+                : response.data.resultats;
+              
+              suggestions.forEach(i => {
+                i.text = i[searchConfig.textField || 'nomComplet'];
+                const coords = searchConfig.coordsPath 
+                  ? [i[searchConfig.coordsPath].x, i[searchConfig.coordsPath].y]
+                  : [i.localitzacio.x, i.localitzacio.y];
+                i.geom = new Point(fromLonLat(coords, this.$map.getView().getProjection()));
+              });
+            }
+            return Object.freeze(suggestions);
+          } catch (error) {
+            console.error("Error en búsqueda temática:", error);
+            throw new Error(this.$gettext('Error en la búsqueda temática'));
+          }
+        },
+        
+        getFeature: async (item) => {
+          this.text = item.text;
+          return new Feature({ geometry: item.geom });
+        }
+      };
+    },
+    barcelonaService() {
       return {
         autocomplete: async (text) => {
           const [x, y] = this.$map.getView().getCenter()
           const [lon, lat] = toLonLat([x, y], this.$map.getView().getProjection())
           const projection = this.$map.getView().getProjection()
-          
-          console.log("centre del mapa", x, y, lon, lat, projection);
-       //   const viewExtent = this.$map.getView().calculateExtent()
-       
-        const response = await axios.get(`https://w33.bcn.cat/geoBCN/serveis/territori?q=${text}&max=8&out_proj=EPSG:4326`);
-   
-         let suggestions = response.data.resultats.adreces
-         const carrers = response.data.resultats.vies
-         let isAdreca = false
-          //if text ends with a number, we assume it is adreça
-          if(text.match(/\d+$/))       isAdreca = true
-
-         if(carrers.length > 1 && !isAdreca) {
-           suggestions = carrers
-         }else if(suggestions.length === 1 && carrers && carrers.length > 1) {
-          //agreguem el  carrer  a les suggestions 
-          suggestions = suggestions.concat(carrers)
-
-           
-         }
-         
-         ////console.log("carrers", carrers);
-         console.log("suggestions", suggestions);
-           
-         
-         suggestions.forEach(i => {
-
-            
-          //   i.text = i.formatted
-          //   i.geom = new Point(fromLonLat([i.lon, i.lat], this.$map.getView().getProjection()))
-          // })
-
-
-              i.text = i.nomComplet
-              /*localitzacio: {?} ?proj: "EPSG:25831" x: 428599.844 y: 4581106.36               */
-              i.geom = new Point(fromLonLat([i.localitzacio.x, i.localitzacio.y], this.$map.getView().getProjection()))
-
-              
-
-
-             //console.log("informacio de la suggestion x= ", i.localitzacio.x, " y= ", i.localitzacio.y, " proj= ", i.localitzacio.proj); 
-                      })
-
-                      //print all suggestions
-          //console.log("informacio de totes les suggestions", suggestions);
-
-            return Object.freeze(suggestions)
-          },
-          getFeature: async (item) => {
-           // console.log('retornant item amb coordenades', item.geom);
-           // console.dir(item.geom);
-           //set text to the selected item
-            this.text = item.text;
-            return new Feature({ geometry: item.geom })
-
+          const response = await axios.get(`https://w33.bcn.cat/geoBCN/serveis/territori?q=${text}&max=8&out_proj=EPSG:4326`);
+          let suggestions = response.data.resultats.adreces
+          const carrers = response.data.resultats.vies
+          let isAdreca = false
+          if(text.match(/\d+$/)) isAdreca = true
+          if(carrers.length > 1 && !isAdreca) {
+            suggestions = carrers
+          } else if(suggestions.length === 1 && carrers && carrers.length > 1) {
+            suggestions = suggestions.concat(carrers)
           }
-        } 
-      
-      
-      
-      
-      // try {
-      //             const response = await axios.get(`https://w33.bcn.cat/geoBCN/serveis/territori?q=${query}&max=8`);
-      //             return response.data.resultats.adreces;
-      //           } catch (error) {
-      //             console.error(error);
-      //             throw new Error('Error fetching data from Barcelona service');
-      //           }
+          suggestions.forEach(i => {
+            i.text = i.nomComplet
+            i.geom = new Point(fromLonLat([i.localitzacio.x, i.localitzacio.y], this.$map.getView().getProjection()))
+          });
+          return Object.freeze(suggestions)
+        },
+        getFeature: async (item) => {
+          this.text = item.text;
+          return new Feature({ geometry: item.geom })
+        }
+      }
     },
     arcgisService () {
       const wkid = this.project.config.projection.split(':')?.[1]
@@ -318,7 +372,6 @@ export default {
           const params = {
             text,
             location: formatLocation(this.$map.getView().getCenter()),
-            // countryCode: 'SK',
             searchExtent: projectExtent,
             maxSuggestions: 8,
             f: 'json',
@@ -356,7 +409,6 @@ export default {
           const projectExtent = this.project.config.project_extent
           const viewExtent = this.$map.getView().calculateExtent()
           const filters = [
-            // 'countrycode:sk',
             `rect:${transformExtent(projectExtent, this.$map.getView().getProjection(), 'EPSG:4326')}`
           ]
           const biases = [
@@ -375,7 +427,6 @@ export default {
             i.text = i.formatted
             i.geom = new Point(fromLonLat([i.lon, i.lat], this.$map.getView().getProjection()))
           })
-          
           return Object.freeze(suggestions)
         },
         getFeature: async (item) => {
@@ -422,5 +473,10 @@ export default {
     gap: 6px;
     padding-right: 6px;
   }
+}
+
+.search-type-select {
+  min-width: 120px;
+  margin-right: 5px;
 }
 </style>
