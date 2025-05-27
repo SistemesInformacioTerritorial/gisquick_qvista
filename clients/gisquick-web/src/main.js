@@ -25,6 +25,14 @@ import '@/ui/layout.scss'
 import '@/ui/transitions/transitions.scss'
 import '@/backhandler'
 
+// Mock interceptor per desenvolupament
+if (process.env.NODE_ENV === 'development' && process.env.VUE_APP_MOCK_MODE === 'true') {
+  import('./dev/mock-interceptor.js').then(module => {
+    module.setupMockInterceptor()
+    console.log('Mode mock activat per desenvolupament')
+  })
+}
+
 import {
   Collapsible,
   CollapseTransition,

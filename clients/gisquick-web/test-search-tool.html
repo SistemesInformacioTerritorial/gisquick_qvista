@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prova SearchTool - Cerca Específica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .search-tool-demo {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .mock-data {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .test-instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Prova de Cerca Específica - SearchTool</h1>
+        
+        <div class="test-instructions">
+            <h3>Instruccions de Prova:</h3>
+            <ol>
+                <li>Aquest entorn simula dades amb variables qV_search</li>
+                <li>Prova les cerques següents:
+                    <ul>
+                        <li><strong>Parcel·les:</strong> "PARC", "001", "002"</li>
+                        <li><strong>Municipis:</strong> "Barcelona", "Girona"</li>
+                    </ul>
+                </li>
+                <li>Verifica que apareix el selector de tipus de cerca</li>
+                <li>Comprova que canvia el placeholder segons el tipus</li>
+                <li>Prova la funcionalitat de zoom i resaltado</li>
+            </ol>
+        </div>
+
+        <div class="search-tool-demo">
+            <h3>SearchTool en Mode Prova</h3>
+            <div id="app">
+                <!-- Aquí es carregarà el component Vue -->
+                <div v-if="!loaded" style="text-align: center; padding: 40px;">
+                    Carregant component de cerca...
+                </div>
+                <search-tool v-else></search-tool>
+            </div>
+        </div>
+
+        <div class="mock-data">
+            <h4>Dades Mock Carregades:</h4>
+            <p><strong>Capes amb qV_search:</strong></p>
+            <ul>
+                <li><strong>parceles:</strong> field="CODI" fieldtext="Codi Parcel·la" desc="Introduïu el codi de la parcel·la"</li>
+                <li><strong>municipis:</strong> field="NOM_MUNI" fieldtext="Nom Municipi" desc="Introduïu el nom del municipi"</li>
+            </ul>
+            <p><strong>Dades disponibles:</strong> PARC001, PARC002, PARC010, Barcelona, Girona</p>
+        </div>
+    </div>
+
+    <!-- Scripts per Vue i el component -->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script>
+        // Mock data
+        const mockData = {
+            layers: [
+                {
+                    name: "parceles",
+                    title: "Parcel·les",
+                    visible: true,
+                    qV_search: 'field="CODI" fieldtext="Codi Parcel·la" desc="Introduïu el codi de la parcel·la"'
+                },
+                {
+                    name: "municipis", 
+                    title: "Municipis",
+                    visible: false,
+                    qV_search: 'field="NOM_MUNI" fieldtext="Nom Municipi" desc="Introduïu el nom del municipi"'
+                }
+            ]
+        }
+
+        const mockResults = {
+            parceles: [
+                { CODI: "PARC001", DESCRIPCIO: "Parcel·la urbana centre" },
+                { CODI: "PARC002", DESCRIPCIO: "Parcel·la residencial" },
+                { CODI: "PARC010", DESCRIPCIO: "Parcel·la industrial" }
+            ],
+            municipis: [
+                { NOM_MUNI: "Barcelona", CODI_INE: "08019" },
+                { NOM_MUNI: "Girona", CODI_INE: "17079" }
+            ]
+        }
+
+        // Component SearchTool simplificat per testing
+        const SearchTool = {
+            template: `
+                <div class="search-tool">
+                    <div style="margin-bottom: 10px;">
+                        <label>Tipus de cerca:</label>
+                        <select v-model="selectedSearchType" @change="onSearchTypeChange" style="margin-left: 10px; padding: 5px;">
+                            <option value="normal">Cerca Normal</option>
+                            <option v-for="search in specificSearches" :key="search.layer" :value="search.layer">
+                                {{ search.fieldtext }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <input 
+                            v-model="searchQuery"
+                            @input="onSearchInput"
+                            :placeholder="currentPlaceholder"
+                            style="width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+                        />
+                    </div>
+                    
+                    <div v-if="suggestions.length > 0" style="border: 1px solid #ccc; max-height: 200px; overflow-y: auto; background: white;">
+                        <div 
+                            v-for="(suggestion, index) in suggestions" 
+                            :key="index"
+                            @click="selectSuggestion(suggestion)"
+                            style="padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; hover: background-color: #f0f0f0;"
+                            @mouseover="$event.target.style.backgroundColor='#f0f0f0'"
+                            @mouseout="$event.target.style.backgroundColor='white'"
+                        >
+                            {{ formatSuggestion(suggestion) }}
+                        </div>
+                    </div>
+                    
+                    <div v-if="selectedFeature" style="margin-top: 20px; padding: 10px; background: #e8f5e8; border-radius: 4px;">
+                        <h4>Feature Seleccionada:</h4>
+                        <pre>{{ JSON.stringify(selectedFeature, null, 2) }}</pre>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    searchQuery: '',
+                    selectedSearchType: 'normal',
+                    suggestions: [],
+                    selectedFeature: null,
+                    specificSearches: []
+                }
+            },
+            computed: {
+                currentPlaceholder() {
+                    if (this.selectedSearchType === 'normal') {
+                        return 'Cerca normal (Barcelona, Madrid...)'
+                    }
+                    const search = this.specificSearches.find(s => s.layer === this.selectedSearchType)
+                    return search ? search.desc : 'Escriu per cercar...'
+                }
+            },
+            methods: {
+                parseQvSearch(qvSearchString) {
+                    const regex = /field="([^"]+)"\s+fieldtext="([^"]+)"\s+desc="([^"]+)"/
+                    const match = qvSearchString.match(regex)
+                    if (match) {
+                        return {
+                            field: match[1],
+                            fieldtext: match[2], 
+                            desc: match[3]
+                        }
+                    }
+                    return null
+                },
+                
+                onSearchTypeChange() {
+                    this.searchQuery = ''
+                    this.suggestions = []
+                    this.selectedFeature = null
+                },
+                
+                onSearchInput() {
+                    if (this.selectedSearchType === 'normal') {
+                        // Cerca normal simulada
+                        if (this.searchQuery.length > 2) {
+                            this.suggestions = ['Barcelona', 'Madrid', 'València'].filter(city => 
+                                city.toLowerCase().includes(this.searchQuery.toLowerCase())
+                            )
+                        } else {
+                            this.suggestions = []
+                        }
+                    } else {
+                        // Cerca específica
+                        if (this.searchQuery.length > 1) {
+                            this.performSpecificSearch()
+                        } else {
+                            this.suggestions = []
+                        }
+                    }
+                },
+                
+                performSpecificSearch() {
+                    const results = mockResults[this.selectedSearchType] || []
+                    const search = this.specificSearches.find(s => s.layer === this.selectedSearchType)
+                    
+                    if (search) {
+                        this.suggestions = results.filter(item => {
+                            const value = item[search.field] || ''
+                            return value.toLowerCase().includes(this.searchQuery.toLowerCase())
+                        })
+                    }
+                },
+                
+                formatSuggestion(suggestion) {
+                    if (typeof suggestion === 'string') {
+                        return suggestion
+                    }
+                    const search = this.specificSearches.find(s => s.layer === this.selectedSearchType)
+                    return search ? suggestion[search.field] : JSON.stringify(suggestion)
+                },
+                
+                selectSuggestion(suggestion) {
+                    this.selectedFeature = suggestion
+                    this.suggestions = []
+                    if (typeof suggestion === 'string') {
+                        this.searchQuery = suggestion
+                    } else {
+                        const search = this.specificSearches.find(s => s.layer === this.selectedSearchType)
+                        this.searchQuery = search ? suggestion[search.field] : ''
+                    }
+                    console.log('Feature seleccionada:', suggestion)
+                }
+            },
+            mounted() {
+                // Simular càrrega de dades del projecte
+                console.log('Carregant dades mock del projecte...')
+                
+                // Processar capes amb qV_search
+                this.specificSearches = mockData.layers
+                    .filter(layer => layer.qV_search)
+                    .map(layer => {
+                        const parsed = this.parseQvSearch(layer.qV_search)
+                        return {
+                            layer: layer.name,
+                            title: layer.title,
+                            ...parsed
+                        }
+                    })
+                    .filter(search => search.field) // Només si el parsing ha funcionat
+                
+                console.log('Cerques específiques detectades:', this.specificSearches)
+            }
+        }
+
+        // Aplicació Vue
+        new Vue({
+            el: '#app',
+            components: {
+                SearchTool
+            },
+            data: {
+                loaded: false
+            },
+            mounted() {
+                // Simular temps de càrrega
+                setTimeout(() => {
+                    this.loaded = true
+                }, 500)
+            }
+        })
+    </script>
+</body>
+</html>
