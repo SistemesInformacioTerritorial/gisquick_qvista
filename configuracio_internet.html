@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>configuracio_internet.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="manual-dinstallaci%C3%B3-i-configuraci%C3%B3---gisquick-qvista-per-windows-server">Manual d'Instal·lació i Configuració - Gisquick-QVista per Windows Server</h1>
+<p><strong>Document:</strong> Manual d'Instal·lació Backend Windows Server<br>
+<strong>Projecte:</strong> Gisquick-QVista<br>
+<strong>Data:</strong> 6 de juny de 2025<br>
+<strong>Versió:</strong> 1.0</p>
+<hr>
+<h2 id="%F0%9F%93%8B-%C3%ADndex">📋 Índex</h2>
+<ol>
+<li>Visió General de l'Arquitectura</li>
+<li>Requisits del Sistema</li>
+<li>Instal·lació del Backend (Golang)</li>
+<li>Configuració d'Apache</li>
+<li>Configuració de Base de Dades PostgreSQL</li>
+<li>Configuració de Redis</li>
+<li>Configuració de Carpeta Compartida de Projectes</li>
+<li>Testing i Verificació</li>
+</ol>
+<hr>
+<h2 id="1-visi%C3%B3-general-de-larquitectura">1. Visió General de l'Arquitectura</h2>
+<h3 id="11-components-del-sistema">1.1 Components del Sistema</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TB
+    subgraph "Windows Server"
+        A[Apache HTTP Server]
+        B[Backend Golang]
+        C[Frontend qVistaWeb]
+    end
+    
+    subgraph "pcpc001 (Servidor BD)"
+        D[PostgreSQL Database]
+        E[Redis Cache]
+        F[Carpeta Projectes Compartida]
+    end
+    
+    A --> B
+    A --> C
+    B --> D
+    B --> E
+    B --> F
+</div></code></pre>
+<h3 id="12-distribuci%C3%B3-de-serveis-per-entorn">1.2 Distribució de Serveis per Entorn</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Producció</th>
+<th>Preproducció</th>
+<th>Integració</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Backend Go</strong></td>
+<td>Port personalitzat</td>
+<td>Port personalitzat</td>
+<td>Port personalitzat</td>
+</tr>
+<tr>
+<td><strong>Apache</strong></td>
+<td>Port personalitzat</td>
+<td>Port personalitzat</td>
+<td>Port personalitzat</td>
+</tr>
+<tr>
+<td><strong>Redis DB</strong></td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td><strong>Projectes</strong></td>
+<td>P:\publish\prod</td>
+<td>P:\publish\pre</td>
+<td>P:\publish\int</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota:</strong> Els ports d'Apache s'assignaran segons disponibilitat (no necessàriament 80, 81, 82)</p>
+</blockquote>
+<hr>
+<h2 id="2-requisits-del-sistema">2. Requisits del Sistema</h2>
+<h3 id="21-windows-server-backend--apache--frontend">2.1 Windows Server (Backend + Apache + Frontend)</h3>
+<p><strong>Especificacions mínimes:</strong></p>
+<ul>
+<li><strong>SO:</strong> Windows Server 2019 o 2022</li>
+<li><strong>RAM:</strong> 16 GB</li>
+<li><strong>CPU:</strong> 8 cores</li>
+<li><strong>Disc:</strong> 200 GB SSD</li>
+<li><strong>Xarxa:</strong> Connectivitat amb pcpc001</li>
+</ul>
+<p><strong>Software requerit:</strong></p>
+<ul>
+<li>Apache 2.4+ per Windows (ja instal·lat)</li>
+<li>Go 1.19+ per Windows</li>
+<li>NSSM (Non-Sucking Service Manager) per serveis</li>
+<li>Node.js 16+ per Windows (per build del frontend)</li>
+</ul>
+<h3 id="22-pcpc001-base-de-dades-i-emmagatzematge">2.2 pcpc001 (Base de Dades i Emmagatzematge)</h3>
+<p><strong>Software requerit:</strong></p>
+<ul>
+<li>PostgreSQL 13+ (ja instal·lat)</li>
+<li>Redis 6+ (ja instal·lat)</li>
+<li>Compartició SMB/CIFS</li>
+</ul>
+<hr>
+<h2 id="3-installaci%C3%B3-del-backend-golang">3. Instal·lació del Backend (Golang)</h2>
+<h3 id="31-installaci%C3%B3-de-go">3.1 Instal·lació de Go</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Descarregar Go per Windows des de https://golang.org/dl/</span>
+<span class="hljs-comment"># Executar l'instal·lador go1.19.windows-amd64.msi</span>
+
+<span class="hljs-comment"># Verificar instal·lació (nou terminal)</span>
+go version
+
+<span class="hljs-comment"># Configurar variables d'entorn si cal</span>
+[<span class="hljs-type">Environment</span>]::SetEnvironmentVariable(<span class="hljs-string">"GOPATH"</span>, <span class="hljs-string">"C:\Go"</span>, <span class="hljs-string">"Machine"</span>)
+[<span class="hljs-type">Environment</span>]::SetEnvironmentVariable(<span class="hljs-string">"PATH"</span>, <span class="hljs-variable">$env:PATH</span> + <span class="hljs-string">";C:\Go\bin"</span>, <span class="hljs-string">"Machine"</span>)
+</div></code></pre>
+<h3 id="32-preparaci%C3%B3-del-codi-font">3.2 Preparació del Codi Font</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Crear directori per l'aplicació</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"C:\gisquick-qvista"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+
+<span class="hljs-comment"># Clonar repositori</span>
+cd C:\gisquick<span class="hljs-literal">-qvista</span>
+git clone https://github.com/SistemesInformacioTerritorial/gisquickserver<span class="hljs-literal">-qvista</span>.git .
+
+<span class="hljs-comment"># Compilar el backend</span>
+cd server
+go mod download
+go build <span class="hljs-literal">-o</span> gisquick<span class="hljs-literal">-server</span>.exe ./cmd/server
+</div></code></pre>
+<h3 id="33-estructura-de-directoris-per-entorns">3.3 Estructura de Directoris per Entorns</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Crear estructura d'entorns separats</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"C:\gisquick-qvista\environments\prod"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"C:\gisquick-qvista\environments\pre"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"C:\gisquick-qvista\environments\int"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+
+<span class="hljs-comment"># Crear directoris de logs per entorn</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"C:\logs\gisquick\prod"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"C:\logs\gisquick\pre"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"C:\logs\gisquick\int"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+</div></code></pre>
+<h3 id="34-configuraci%C3%B3-del-backend-per-entorns">3.4 Configuració del Backend per Entorns</h3>
+<p><strong>Crear fitxer <code>C:\gisquick-qvista\environments\prod\config.yaml</code> (Producció):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-attr">server:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"0.0.0.0"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">3000</span>  <span class="hljs-comment"># Ajustar segons port disponible</span>
+  <span class="hljs-attr">debug:</span> <span class="hljs-literal">false</span>
+
+<span class="hljs-attr">database:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"pcpc001"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">5432</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">"gisquick"</span>
+  <span class="hljs-attr">user:</span> <span class="hljs-string">"gisquick_user"</span>
+  <span class="hljs-attr">password:</span> <span class="hljs-string">"PASSWORD_POSTGRES"</span>
+  <span class="hljs-attr">sslmode:</span> <span class="hljs-string">"disable"</span>
+
+<span class="hljs-attr">redis:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"pcpc001"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">6379</span>
+  <span class="hljs-attr">password:</span> <span class="hljs-string">""</span>
+  <span class="hljs-attr">db:</span> <span class="hljs-number">0</span>
+
+<span class="hljs-attr">storage:</span>
+  <span class="hljs-attr">projects_path:</span> <span class="hljs-string">"P:\\publish\\prod"</span>
+  <span class="hljs-attr">media_path:</span> <span class="hljs-string">"P:\\uploads\\prod"</span>
+  <span class="hljs-attr">temp_path:</span> <span class="hljs-string">"P:\\temp\\prod"</span>
+
+<span class="hljs-attr">logging:</span>
+  <span class="hljs-attr">level:</span> <span class="hljs-string">"info"</span>
+  <span class="hljs-attr">file:</span> <span class="hljs-string">"C:\\logs\\gisquick\\prod\\backend.log"</span>
+</div></code></pre>
+<p><strong>Crear fitxer <code>C:\gisquick-qvista\environments\pre\config.yaml</code> (Preproducció):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-attr">server:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"0.0.0.0"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">4000</span>  <span class="hljs-comment"># Ajustar segons port disponible</span>
+  <span class="hljs-attr">debug:</span> <span class="hljs-literal">false</span>
+
+<span class="hljs-attr">database:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"pcpc001"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">5432</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">"gisquick"</span>
+  <span class="hljs-attr">user:</span> <span class="hljs-string">"gisquick_user"</span>
+  <span class="hljs-attr">password:</span> <span class="hljs-string">"PASSWORD_POSTGRES"</span>
+  <span class="hljs-attr">sslmode:</span> <span class="hljs-string">"disable"</span>
+
+<span class="hljs-attr">redis:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"pcpc001"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">6379</span>
+  <span class="hljs-attr">password:</span> <span class="hljs-string">""</span>
+  <span class="hljs-attr">db:</span> <span class="hljs-number">1</span>
+
+<span class="hljs-attr">storage:</span>
+  <span class="hljs-attr">projects_path:</span> <span class="hljs-string">"P:\\publish\\pre"</span>
+  <span class="hljs-attr">media_path:</span> <span class="hljs-string">"P:\\uploads\\pre"</span>
+  <span class="hljs-attr">temp_path:</span> <span class="hljs-string">"P:\\temp\\pre"</span>
+
+<span class="hljs-attr">logging:</span>
+  <span class="hljs-attr">level:</span> <span class="hljs-string">"info"</span>
+  <span class="hljs-attr">file:</span> <span class="hljs-string">"C:\\logs\\gisquick\\pre\\backend.log"</span>
+</div></code></pre>
+<p><strong>Crear fitxer <code>C:\gisquick-qvista\environments\int\config.yaml</code> (Integració):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-attr">server:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"0.0.0.0"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">5000</span>  <span class="hljs-comment"># Ajustar segons port disponible</span>
+  <span class="hljs-attr">debug:</span> <span class="hljs-literal">true</span>
+
+<span class="hljs-attr">database:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"pcpc001"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">5432</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">"gisquick"</span>
+  <span class="hljs-attr">user:</span> <span class="hljs-string">"gisquick_user"</span>
+  <span class="hljs-attr">password:</span> <span class="hljs-string">"PASSWORD_POSTGRES"</span>
+  <span class="hljs-attr">sslmode:</span> <span class="hljs-string">"disable"</span>
+
+<span class="hljs-attr">redis:</span>
+  <span class="hljs-attr">host:</span> <span class="hljs-string">"pcpc001"</span>
+  <span class="hljs-attr">port:</span> <span class="hljs-number">6379</span>
+  <span class="hljs-attr">password:</span> <span class="hljs-string">""</span>
+  <span class="hljs-attr">db:</span> <span class="hljs-number">2</span>
+
+<span class="hljs-attr">storage:</span>
+  <span class="hljs-attr">projects_path:</span> <span class="hljs-string">"P:\\publish\\int"</span>
+  <span class="hljs-attr">media_path:</span> <span class="hljs-string">"P:\\uploads\\int"</span>
+  <span class="hljs-attr">temp_path:</span> <span class="hljs-string">"P:\\temp\\int"</span>
+
+<span class="hljs-attr">logging:</span>
+  <span class="hljs-attr">level:</span> <span class="hljs-string">"debug"</span>
+  <span class="hljs-attr">file:</span> <span class="hljs-string">"C:\\logs\\gisquick\\int\\backend.log"</span>
+</div></code></pre>
+<h3 id="35-crear-serveis-windows">3.5 Crear Serveis Windows</h3>
+<p><strong>Instal·lar NSSM:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Descarregar NSSM des de https://nssm.cc/download</span>
+<span class="hljs-comment"># Extreure a C:\nssm</span>
+<span class="hljs-comment"># Afegir C:\nssm\win64 al PATH del sistema</span>
+
+<span class="hljs-comment"># Verificar instal·lació</span>
+nssm version
+</div></code></pre>
+<p><strong>Crear serveis per cada entorn:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Servei Producció</span>
+nssm install GisquickBackendProd <span class="hljs-string">"C:\gisquick-qvista\server\gisquick-server.exe"</span>
+nssm set GisquickBackendProd Parameters <span class="hljs-string">"-config=C:\gisquick-qvista\environments\prod\config.yaml"</span>
+nssm set GisquickBackendProd AppDirectory <span class="hljs-string">"C:\gisquick-qvista\environments\prod"</span>
+nssm set GisquickBackendProd DisplayName <span class="hljs-string">"Gisquick Backend Producció"</span>
+nssm set GisquickBackendProd Description <span class="hljs-string">"Gisquick Backend Service - Producció"</span>
+nssm set GisquickBackendProd AppStdout <span class="hljs-string">"C:\logs\gisquick\prod\stdout.log"</span>
+nssm set GisquickBackendProd AppStderr <span class="hljs-string">"C:\logs\gisquick\prod\stderr.log"</span>
+
+<span class="hljs-comment"># Servei Preproducció</span>
+nssm install GisquickBackendPre <span class="hljs-string">"C:\gisquick-qvista\server\gisquick-server.exe"</span>
+nssm set GisquickBackendPre Parameters <span class="hljs-string">"-config=C:\gisquick-qvista\environments\pre\config.yaml"</span>
+nssm set GisquickBackendPre AppDirectory <span class="hljs-string">"C:\gisquick-qvista\environments\pre"</span>
+nssm set GisquickBackendPre DisplayName <span class="hljs-string">"Gisquick Backend Preproducció"</span>
+nssm set GisquickBackendPre Description <span class="hljs-string">"Gisquick Backend Service - Preproducció"</span>
+nssm set GisquickBackendPre AppStdout <span class="hljs-string">"C:\logs\gisquick\pre\stdout.log"</span>
+nssm set GisquickBackendPre AppStderr <span class="hljs-string">"C:\logs\gisquick\pre\stderr.log"</span>
+
+<span class="hljs-comment"># Servei Integració</span>
+nssm install GisquickBackendInt <span class="hljs-string">"C:\gisquick-qvista\server\gisquick-server.exe"</span>
+nssm set GisquickBackendInt Parameters <span class="hljs-string">"-config=C:\gisquick-qvista\environments\int\config.yaml"</span>
+nssm set GisquickBackendInt AppDirectory <span class="hljs-string">"C:\gisquick-qvista\environments\int"</span>
+nssm set GisquickBackendInt DisplayName <span class="hljs-string">"Gisquick Backend Integració"</span>
+nssm set GisquickBackendInt Description <span class="hljs-string">"Gisquick Backend Service - Integració"</span>
+nssm set GisquickBackendInt AppStdout <span class="hljs-string">"C:\logs\gisquick\int\stdout.log"</span>
+nssm set GisquickBackendInt AppStderr <span class="hljs-string">"C:\logs\gisquick\int\stderr.log"</span>
+
+<span class="hljs-comment"># Iniciar serveis</span>
+<span class="hljs-built_in">Start-Service</span> GisquickBackendProd
+<span class="hljs-built_in">Start-Service</span> GisquickBackendPre
+<span class="hljs-built_in">Start-Service</span> GisquickBackendInt
+
+<span class="hljs-comment"># Verificar estat</span>
+<span class="hljs-built_in">Get-Service</span> GisquickBackend*
+</div></code></pre>
+<hr>
+<h2 id="4-configuraci%C3%B3-dapache">4. Configuració d'Apache</h2>
+<h3 id="41-verificar-ports-disponibles">4.1 Verificar Ports Disponibles</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Verificar ports disponibles</span>
+netstat <span class="hljs-literal">-an</span> | findstr <span class="hljs-string">"LISTENING"</span>
+
+<span class="hljs-comment"># Exemple d'assignació de ports disponibles:</span>
+<span class="hljs-comment"># Producció: Port 8080</span>
+<span class="hljs-comment"># Preproducció: Port 8081  </span>
+<span class="hljs-comment"># Integració: Port 8082</span>
+</div></code></pre>
+<h3 id="42-actualitzar-configuraci%C3%B3-apache">4.2 Actualitzar Configuració Apache</h3>
+<p><strong>Editar configuració Apache basant-se en l'estructura actual:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># ACTUALITZAR PORTS SEGONS DISPONIBILITAT</span>
+
+<span class="hljs-comment"># Producció (exemple port 8080)</span>
+<span class="hljs-section">&lt;VirtualHost *:8080&gt;</span>
+    <span class="hljs-comment"># Proxy per Backend (actualitzar port segons config.yaml)</span>
+    <span class="hljs-attribute">ProxyPass</span> /api/ http://localhost:3000/api/
+    <span class="hljs-attribute">ProxyPassReverse</span> /api/ http://localhost:3000/api/
+    
+    <span class="hljs-comment"># WebSocket support</span>
+    <span class="hljs-attribute">ProxyPass</span> /ws/ ws://localhost:3000/ws/
+    <span class="hljs-attribute">ProxyPassReverse</span> /ws/ ws://localhost:3000/ws/
+    
+    <span class="hljs-comment"># QGIS Server FastCGI</span>
+    <span class="hljs-section">&lt;Location /qgis-server&gt;</span>
+        <span class="hljs-attribute">ProxyPass</span> fcgi://localhost:8080/
+        <span class="hljs-attribute">ProxyPassReverse</span> fcgi://localhost:8080/
+    <span class="hljs-section">&lt;/Location&gt;</span>
+    
+    <span class="hljs-comment"># Configuració de directoris</span>
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> C:/gisquick/www/html/
+    
+    <span class="hljs-section">&lt;Directory C:/gisquick/www/html/&gt;</span>
+        <span class="hljs-attribute">Require</span> <span class="hljs-literal">all</span> granted
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+    
+    <span class="hljs-section">&lt;Directory C:/gisquick/www/html/user&gt;</span>
+        <span class="hljs-attribute">Require</span> <span class="hljs-literal">all</span> granted
+        <span class="hljs-attribute"><span class="hljs-nomarkup">RewriteEngine</span></span> <span class="hljs-literal">On</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{ENV:REDIRECT_STATUS}</span> ^$
+        <span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{REQUEST_URI}</span> ^/user(/.*)?$
+        <span class="hljs-attribute"><span class="hljs-nomarkup">RewriteCond</span></span> <span class="hljs-variable">%{REQUEST_URI}</span> !^/user/static/.*
+        <span class="hljs-attribute"><span class="hljs-nomarkup">RewriteRule</span></span> ^ /user/<span class="hljs-meta"> [L]</span>
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+    
+    <span class="hljs-comment"># Alias per arxius estàtics</span>
+    <span class="hljs-attribute">Alias</span> /index.html C:/gisquick/www/html/map/index.html
+    <span class="hljs-attribute">Alias</span> /favicon.ico C:/gisquick/www/html/map/favicon.ico
+    <span class="hljs-attribute">Alias</span> /manifest.json C:/gisquick/www/html/map/manifest.json
+    <span class="hljs-attribute">Alias</span> /service-worker.js C:/gisquick/www/html/map/service-worker.js
+    <span class="hljs-attribute">AliasMatch</span> ^/workbox.* C:/gisquick/www/html/map/workbox
+    <span class="hljs-attribute">Alias</span> /map/ C:/gisquick/www/html/map/map/
+    
+    <span class="hljs-section">&lt;Directory C:/gisquick/www/html/map/&gt;</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Options</span></span> Indexes FollowSymLinks
+        <span class="hljs-attribute">AllowOverride</span> None
+        <span class="hljs-attribute">Require</span> <span class="hljs-literal">all</span> granted
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+<span class="hljs-section">&lt;/VirtualHost&gt;</span>
+
+<span class="hljs-comment"># Preproducció (exemple port 8081)</span>
+<span class="hljs-section">&lt;VirtualHost *:8081&gt;</span>
+    <span class="hljs-attribute">ProxyPass</span> /api/ http://localhost:4000/api/
+    <span class="hljs-attribute">ProxyPassReverse</span> /api/ http://localhost:4000/api/
+    <span class="hljs-attribute">ProxyPass</span> /ws/ ws://localhost:4000/ws/
+    <span class="hljs-attribute">ProxyPassReverse</span> /ws/ ws://localhost:4000/ws/
+    
+    <span class="hljs-section">&lt;Location /qgis-server&gt;</span>
+        <span class="hljs-attribute">ProxyPass</span> fcgi://localhost:8080/
+        <span class="hljs-attribute">ProxyPassReverse</span> fcgi://localhost:8080/
+    <span class="hljs-section">&lt;/Location&gt;</span>
+    
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> C:/gisquick-pre/www/html/
+    <span class="hljs-comment"># ...existing code...</span>
+<span class="hljs-section">&lt;/VirtualHost&gt;</span>
+
+<span class="hljs-comment"># Integració (exemple port 8082)</span>
+<span class="hljs-section">&lt;VirtualHost *:8082&gt;</span>
+    <span class="hljs-attribute">ProxyPass</span> /api/ http://localhost:5000/api/
+    <span class="hljs-attribute">ProxyPassReverse</span> /api/ http://localhost:5000/api/
+    <span class="hljs-attribute">ProxyPass</span> /ws/ ws://localhost:5000/ws/
+    <span class="hljs-attribute">ProxyPassReverse</span> /ws/ ws://localhost:5000/ws/
+    
+    <span class="hljs-section">&lt;Location /qgis-server&gt;</span>
+        <span class="hljs-attribute">ProxyPass</span> fcgi://localhost:8080/
+        <span class="hljs-attribute">ProxyPassReverse</span> fcgi://localhost:8080/
+    <span class="hljs-section">&lt;/Location&gt;</span>
+    
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> C:/gisquick-int/www/html/
+    <span class="hljs-comment"># ...existing code...</span>
+<span class="hljs-section">&lt;/VirtualHost&gt;</span>
+</div></code></pre>
+<h3 id="43-verificar-configuraci%C3%B3-apache">4.3 Verificar Configuració Apache</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Verificar configuració d'Apache</span>
+C:\Apache24\bin\httpd.exe <span class="hljs-literal">-t</span>
+
+<span class="hljs-comment"># Reiniciar Apache per aplicar canvis</span>
+<span class="hljs-built_in">Restart-Service</span> Apache2.<span class="hljs-number">4</span>
+
+<span class="hljs-comment"># Verificar estat</span>
+<span class="hljs-built_in">Get-Service</span> Apache2.<span class="hljs-number">4</span>
+</div></code></pre>
+<hr>
+<h2 id="5-configuraci%C3%B3-de-base-de-dades-postgresql">5. Configuració de Base de Dades PostgreSQL</h2>
+<p>PostgreSQL ja està instal·lat a pcpc001. Cal crear l'usuari, base de dades i esquema complet per Gisquick.</p>
+<h3 id="51-crear-usuari-i-base-de-dades">5.1 Crear Usuari i Base de Dades</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">-- Connectar com a superusuari postgres</span>
+psql -U postgres
+
+<span class="hljs-comment">-- Crear usuari per Gisquick</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">USER</span> gisquick_user <span class="hljs-keyword">WITH</span> <span class="hljs-keyword">PASSWORD</span> <span class="hljs-string">'PASSWORD_SEGUR_AQUI'</span>;
+
+<span class="hljs-comment">-- Crear base de dades</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">DATABASE</span> gisquick OWNER gisquick_user;
+
+<span class="hljs-comment">-- Connectar a la base de dades</span>
+\c gisquick
+
+<span class="hljs-comment">-- Habilitar extensions necessàries</span>
+<span class="hljs-keyword">CREATE</span> EXTENSION <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> postgis;
+<span class="hljs-keyword">CREATE</span> EXTENSION <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> postgis_topology;
+<span class="hljs-keyword">CREATE</span> EXTENSION <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> <span class="hljs-string">"uuid-ossp"</span>;
+
+<span class="hljs-comment">-- Concedir permisos</span>
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">PRIVILEGES</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DATABASE</span> gisquick <span class="hljs-keyword">TO</span> gisquick_user;
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">SCHEMA</span> <span class="hljs-keyword">public</span> <span class="hljs-keyword">TO</span> gisquick_user;
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">TABLES</span> <span class="hljs-keyword">IN</span> <span class="hljs-keyword">SCHEMA</span> <span class="hljs-keyword">public</span> <span class="hljs-keyword">TO</span> gisquick_user;
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">ALL</span> SEQUENCES <span class="hljs-keyword">IN</span> <span class="hljs-keyword">SCHEMA</span> <span class="hljs-keyword">public</span> <span class="hljs-keyword">TO</span> gisquick_user;
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">ALL</span> FUNCTIONS <span class="hljs-keyword">IN</span> <span class="hljs-keyword">SCHEMA</span> <span class="hljs-keyword">public</span> <span class="hljs-keyword">TO</span> gisquick_user;
+
+\q
+</div></code></pre>
+<h3 id="52-crear-esquema-de-dades-gisquick">5.2 Crear Esquema de Dades Gisquick</h3>
+<pre class="hljs"><code><div><span class="hljs-comment">-- Connectar amb l'usuari gisquick</span>
+psql -h pcpc001 -U gisquick_user -d gisquick
+
+<span class="hljs-comment">-- Taula d'usuaris</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-keyword">users</span> (
+    <span class="hljs-keyword">id</span> <span class="hljs-built_in">SERIAL</span> PRIMARY <span class="hljs-keyword">KEY</span>,
+    username <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">UNIQUE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    password_hash <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    email <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>),
+    first_name <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>),
+    last_name <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>),
+    is_active <span class="hljs-built_in">BOOLEAN</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">true</span>,
+    is_superuser <span class="hljs-built_in">BOOLEAN</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">false</span>,
+    created_at <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">WITH</span> <span class="hljs-built_in">TIME</span> ZONE <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+    updated_at <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">WITH</span> <span class="hljs-built_in">TIME</span> ZONE <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>
+);
+
+<span class="hljs-comment">-- Taula de sessions</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> user_sessions (
+    <span class="hljs-keyword">id</span> <span class="hljs-keyword">UUID</span> PRIMARY <span class="hljs-keyword">KEY</span> <span class="hljs-keyword">DEFAULT</span> uuid_generate_v4(),
+    user_id <span class="hljs-built_in">INTEGER</span> <span class="hljs-keyword">REFERENCES</span> <span class="hljs-keyword">users</span>(<span class="hljs-keyword">id</span>) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">CASCADE</span>,
+    session_key <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">UNIQUE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    created_at <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">WITH</span> <span class="hljs-built_in">TIME</span> ZONE <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+    expires_at <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">WITH</span> <span class="hljs-built_in">TIME</span> ZONE <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    is_active <span class="hljs-built_in">BOOLEAN</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">true</span>
+);
+
+<span class="hljs-comment">-- Taula de projectes</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> projects (
+    <span class="hljs-keyword">id</span> <span class="hljs-built_in">SERIAL</span> PRIMARY <span class="hljs-keyword">KEY</span>,
+    <span class="hljs-keyword">name</span> <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">UNIQUE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    title <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>),
+    description <span class="hljs-built_in">TEXT</span>,
+    owner_id <span class="hljs-built_in">INTEGER</span> <span class="hljs-keyword">REFERENCES</span> <span class="hljs-keyword">users</span>(<span class="hljs-keyword">id</span>),
+    is_public <span class="hljs-built_in">BOOLEAN</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">false</span>,
+    config <span class="hljs-keyword">JSON</span>,
+    created_at <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">WITH</span> <span class="hljs-built_in">TIME</span> ZONE <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+    updated_at <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">WITH</span> <span class="hljs-built_in">TIME</span> ZONE <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>
+);
+
+<span class="hljs-comment">-- Taula de permisos de projecte</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> project_permissions (
+    <span class="hljs-keyword">id</span> <span class="hljs-built_in">SERIAL</span> PRIMARY <span class="hljs-keyword">KEY</span>,
+    project_id <span class="hljs-built_in">INTEGER</span> <span class="hljs-keyword">REFERENCES</span> projects(<span class="hljs-keyword">id</span>) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">CASCADE</span>,
+    user_id <span class="hljs-built_in">INTEGER</span> <span class="hljs-keyword">REFERENCES</span> <span class="hljs-keyword">users</span>(<span class="hljs-keyword">id</span>) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">CASCADE</span>,
+    permission_type <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>, <span class="hljs-comment">-- 'read', 'write', 'admin'</span>
+    granted_at <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">WITH</span> <span class="hljs-built_in">TIME</span> ZONE <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+    <span class="hljs-keyword">UNIQUE</span>(project_id, user_id)
+);
+
+<span class="hljs-comment">-- Taula de logs d'activitat</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> activity_logs (
+    <span class="hljs-keyword">id</span> <span class="hljs-built_in">SERIAL</span> PRIMARY <span class="hljs-keyword">KEY</span>,
+    user_id <span class="hljs-built_in">INTEGER</span> <span class="hljs-keyword">REFERENCES</span> <span class="hljs-keyword">users</span>(<span class="hljs-keyword">id</span>),
+    project_id <span class="hljs-built_in">INTEGER</span> <span class="hljs-keyword">REFERENCES</span> projects(<span class="hljs-keyword">id</span>),
+    <span class="hljs-keyword">action</span> <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">100</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    details <span class="hljs-keyword">JSON</span>,
+    ip_address INET,
+    user_agent <span class="hljs-built_in">TEXT</span>,
+    created_at <span class="hljs-built_in">TIMESTAMP</span> <span class="hljs-keyword">WITH</span> <span class="hljs-built_in">TIME</span> ZONE <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>
+);
+
+<span class="hljs-comment">-- Crear usuari administrador per defecte</span>
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-keyword">users</span> (username, password_hash, email, first_name, last_name, is_superuser) 
+<span class="hljs-keyword">VALUES</span> (
+    <span class="hljs-string">'admin'</span>, 
+    <span class="hljs-string">'$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'</span>, <span class="hljs-comment">-- password: 'password'</span>
+    <span class="hljs-string">'admin@example.com'</span>,
+    <span class="hljs-string">'Administrator'</span>,
+    <span class="hljs-string">'System'</span>,
+    <span class="hljs-literal">true</span>
+);
+
+<span class="hljs-comment">-- Crear índexs per rendiment</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_users_username <span class="hljs-keyword">ON</span> <span class="hljs-keyword">users</span>(username);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_users_email <span class="hljs-keyword">ON</span> <span class="hljs-keyword">users</span>(email);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_sessions_user_id <span class="hljs-keyword">ON</span> user_sessions(user_id);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_sessions_expires <span class="hljs-keyword">ON</span> user_sessions(expires_at);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_projects_owner <span class="hljs-keyword">ON</span> projects(owner_id);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_projects_name <span class="hljs-keyword">ON</span> projects(<span class="hljs-keyword">name</span>);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_permissions_project <span class="hljs-keyword">ON</span> project_permissions(project_id);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_permissions_user <span class="hljs-keyword">ON</span> project_permissions(user_id);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_logs_user <span class="hljs-keyword">ON</span> activity_logs(user_id);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_logs_project <span class="hljs-keyword">ON</span> activity_logs(project_id);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> idx_logs_created <span class="hljs-keyword">ON</span> activity_logs(created_at);
+
+<span class="hljs-comment">-- Verificar creació de taules</span>
+\dt
+\q
+</div></code></pre>
+<h3 id="53-configurar-acc%C3%A9s-remot">5.3 Configurar Accés Remot</h3>
+<p><strong>Editar <code>postgresql.conf</code>:</strong></p>
+<pre class="hljs"><code><div># Si cal permetre connexions remotes
+listen_addresses = '*'
+port = 5432
+</div></code></pre>
+<p><strong>Editar <code>pg_hba.conf</code>:</strong></p>
+<pre class="hljs"><code><div># Afegir línia per permetre connexió des del servidor de l'aplicació
+host    gisquick    gisquick_user    IP_SERVIDOR_APLICACIO/32    md5
+</div></code></pre>
+<p><strong>Reiniciar PostgreSQL:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Si pcpc001 és Windows</span>
+<span class="hljs-built_in">Restart-Service</span> postgresql<span class="hljs-literal">-x64</span><span class="hljs-literal">-13</span>
+
+<span class="hljs-comment"># Si és Linux</span>
+<span class="hljs-comment"># sudo systemctl restart postgresql</span>
+</div></code></pre>
+<h3 id="54-verificar-connexi%C3%B3-i-esquema">5.4 Verificar Connexió i Esquema</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Des del servidor d'aplicació, verificar connexió</span>
+psql <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-U</span> gisquick_user <span class="hljs-literal">-d</span> gisquick <span class="hljs-literal">-c</span> <span class="hljs-string">"SELECT version();"</span>
+
+<span class="hljs-comment"># Verificar PostGIS</span>
+psql <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-U</span> gisquick_user <span class="hljs-literal">-d</span> gisquick <span class="hljs-literal">-c</span> <span class="hljs-string">"SELECT PostGIS_Version();"</span>
+
+<span class="hljs-comment"># Verificar taules creades</span>
+psql <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-U</span> gisquick_user <span class="hljs-literal">-d</span> gisquick <span class="hljs-literal">-c</span> <span class="hljs-string">"\dt"</span>
+
+<span class="hljs-comment"># Verificar usuari admin</span>
+psql <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-U</span> gisquick_user <span class="hljs-literal">-d</span> gisquick <span class="hljs-literal">-c</span> <span class="hljs-string">"SELECT username, email, is_superuser FROM users;"</span>
+</div></code></pre>
+<hr>
+<h2 id="6-configuraci%C3%B3-de-redis">6. Configuració de Redis</h2>
+<p>Redis ja està instal·lat a pcpc001. Cal configurar bases de dades separades per cada entorn.</p>
+<h3 id="61-configurar-bases-de-dades-per-entorn">6.1 Configurar Bases de Dades per Entorn</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Connectar a Redis al pcpc001</span>
+redis<span class="hljs-literal">-cli</span> <span class="hljs-literal">-h</span> pcpc001
+
+<span class="hljs-comment"># Verificar configuració actual</span>
+INFO server
+
+<span class="hljs-comment"># Configurar bases de dades:</span>
+<span class="hljs-comment"># DB 0: Producció (per defecte)</span>
+<span class="hljs-comment"># DB 1: Preproducció  </span>
+<span class="hljs-comment"># DB 2: Integració</span>
+
+<span class="hljs-comment"># Verificar que podem accedir a cada DB</span>
+SELECT <span class="hljs-number">0</span>
+PING
+SELECT <span class="hljs-number">1</span>  
+PING
+SELECT <span class="hljs-number">2</span>
+PING
+
+<span class="hljs-comment"># Sortir</span>
+QUIT
+</div></code></pre>
+<h3 id="62-verificar-acc%C3%A9s-des-del-servidor-daplicaci%C3%B3">6.2 Verificar Accés des del Servidor d'Aplicació</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Verificar connectivitat</span>
+<span class="hljs-built_in">Test-NetConnection</span> <span class="hljs-literal">-ComputerName</span> pcpc001 <span class="hljs-literal">-Port</span> <span class="hljs-number">6379</span>
+
+<span class="hljs-comment"># Si tens redis-cli instal·lat, provar connexió per entorn</span>
+redis<span class="hljs-literal">-cli</span> <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-n</span> <span class="hljs-number">0</span> ping  <span class="hljs-comment"># Producció</span>
+redis<span class="hljs-literal">-cli</span> <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-n</span> <span class="hljs-number">1</span> ping  <span class="hljs-comment"># Preproducció</span>
+redis<span class="hljs-literal">-cli</span> <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-n</span> <span class="hljs-number">2</span> ping  <span class="hljs-comment"># Integració</span>
+</div></code></pre>
+<hr>
+<h2 id="7-configuraci%C3%B3-de-carpeta-compartida-de-projectes">7. Configuració de Carpeta Compartida de Projectes</h2>
+<h3 id="71-configurar-compartici%C3%B3-smb-al-pcpc001">7.1 Configurar Compartició SMB al pcpc001</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Al servidor pcpc001, crear compartició</span>
+<span class="hljs-built_in">New-SmbShare</span> <span class="hljs-literal">-Name</span> <span class="hljs-string">"gisquick-projects"</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects"</span> <span class="hljs-literal">-FullAccess</span> <span class="hljs-string">"Everyone"</span>
+
+<span class="hljs-comment"># Crear estructura de directoris per entorns</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\publish\prod"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\publish\pre"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\publish\int"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\uploads\prod"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\uploads\pre"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\uploads\int"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\temp\prod"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\temp\pre"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"D:\gisquick-projects\temp\int"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+
+<span class="hljs-comment"># Verificar compartició</span>
+<span class="hljs-built_in">Get-SmbShare</span> <span class="hljs-literal">-Name</span> <span class="hljs-string">"gisquick-projects"</span>
+</div></code></pre>
+<h3 id="72-muntar-unitat-de-xarxa-al-servidor-daplicaci%C3%B3">7.2 Muntar Unitat de Xarxa al Servidor d'Aplicació</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Al servidor d'aplicació, muntar unitat de xarxa</span>
+net use P: \\pcpc001\gisquick<span class="hljs-literal">-projects</span> /persistent:yes
+
+<span class="hljs-comment"># Verificar muntatge</span>
+<span class="hljs-built_in">Get-PSDrive</span> P
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"P:\uploads"</span>
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"P:\publish"</span>
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"P:\temp"</span>
+</div></code></pre>
+<h3 id="73-configurar-muntatge-autom%C3%A0tic">7.3 Configurar Muntatge Automàtic</h3>
+<p><strong>Crear script <code>C:\scripts\mount-projects.ps1</code>:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Script per muntar automàticament la unitat de projectes</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-comment"># Verificar si ja està muntada</span>
+    <span class="hljs-variable">$Drive</span> = <span class="hljs-built_in">Get-PSDrive</span> P <span class="hljs-literal">-ErrorAction</span> SilentlyContinue
+    <span class="hljs-keyword">if</span> (<span class="hljs-operator">-not</span> <span class="hljs-variable">$Drive</span>) {
+        net use P: \\pcpc001\gisquick<span class="hljs-literal">-projects</span> /persistent:yes
+        <span class="hljs-built_in">Write-Host</span> <span class="hljs-string">"Unitat P: muntada correctament"</span>
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-built_in">Write-Host</span> <span class="hljs-string">"Unitat P: ja està muntada"</span>
+    }
+} <span class="hljs-keyword">catch</span> {
+    <span class="hljs-built_in">Write-Error</span> <span class="hljs-string">"Error muntant unitat P: <span class="hljs-variable">$</span>(<span class="hljs-variable">$_</span>.Exception.Message)"</span>
+    <span class="hljs-keyword">exit</span> <span class="hljs-number">1</span>
+}
+</div></code></pre>
+<p><strong>Configurar tasca programada:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Crear directori scripts</span>
+<span class="hljs-built_in">New-Item</span> <span class="hljs-literal">-Path</span> <span class="hljs-string">"C:\scripts"</span> <span class="hljs-literal">-ItemType</span> Directory <span class="hljs-literal">-Force</span>
+
+<span class="hljs-comment"># Crear tasca programada per muntar a l'inici</span>
+<span class="hljs-variable">$Action</span> = <span class="hljs-built_in">New-ScheduledTaskAction</span> <span class="hljs-literal">-Execute</span> <span class="hljs-string">"PowerShell.exe"</span> <span class="hljs-literal">-Argument</span> <span class="hljs-string">"-ExecutionPolicy Bypass -File C:\scripts\mount-projects.ps1"</span>
+<span class="hljs-variable">$Trigger</span> = <span class="hljs-built_in">New-ScheduledTaskTrigger</span> <span class="hljs-literal">-AtStartup</span>
+<span class="hljs-variable">$Principal</span> = <span class="hljs-built_in">New-ScheduledTaskPrincipal</span> <span class="hljs-literal">-UserId</span> <span class="hljs-string">"SYSTEM"</span> <span class="hljs-literal">-LogonType</span> ServiceAccount
+<span class="hljs-variable">$Settings</span> = <span class="hljs-built_in">New-ScheduledTaskSettingsSet</span> <span class="hljs-literal">-AllowStartIfOnBatteries</span> <span class="hljs-literal">-DontStopIfGoingOnBatteries</span>
+
+<span class="hljs-built_in">Register-ScheduledTask</span> <span class="hljs-literal">-TaskName</span> <span class="hljs-string">"MountGisquickProjects"</span> <span class="hljs-literal">-Action</span> <span class="hljs-variable">$Action</span> <span class="hljs-literal">-Trigger</span> <span class="hljs-variable">$Trigger</span> <span class="hljs-literal">-Principal</span> <span class="hljs-variable">$Principal</span> <span class="hljs-literal">-Settings</span> <span class="hljs-variable">$Settings</span>
+</div></code></pre>
+<hr>
+<h2 id="8-testing-i-verificaci%C3%B3">8. Testing i Verificació</h2>
+<h3 id="81-verificaci%C3%B3-de-serveis">8.1 Verificació de Serveis</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Verificar serveis del backend</span>
+<span class="hljs-built_in">Get-Service</span> GisquickBackendProd
+<span class="hljs-built_in">Get-Service</span> GisquickBackendPre
+<span class="hljs-built_in">Get-Service</span> GisquickBackendInt
+
+<span class="hljs-comment"># Verificar Apache</span>
+<span class="hljs-built_in">Get-Service</span> Apache2.<span class="hljs-number">4</span>
+
+<span class="hljs-comment"># Verificar unitat de xarxa</span>
+<span class="hljs-built_in">Get-PSDrive</span> P
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"P:\uploads\prod"</span>
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"P:\uploads\pre"</span>
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"P:\uploads\int"</span>
+</div></code></pre>
+<h3 id="82-test-de-connectivitat-backend">8.2 Test de Connectivitat Backend</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Test APIs Backend per cada entorn (ajustar ports segons configuració)</span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:3000/api/app/"</span> <span class="hljs-literal">-UseBasicParsing</span>  <span class="hljs-comment"># Producció</span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:4000/api/app/"</span> <span class="hljs-literal">-UseBasicParsing</span>  <span class="hljs-comment"># Preproducció  </span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:5000/api/app/"</span> <span class="hljs-literal">-UseBasicParsing</span>  <span class="hljs-comment"># Integració</span>
+
+<span class="hljs-comment"># Test Base de Dades</span>
+psql <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-U</span> gisquick_user <span class="hljs-literal">-d</span> gisquick <span class="hljs-literal">-c</span> <span class="hljs-string">"SELECT NOW();"</span>
+
+<span class="hljs-comment"># Test esquema de dades</span>
+psql <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-U</span> gisquick_user <span class="hljs-literal">-d</span> gisquick <span class="hljs-literal">-c</span> <span class="hljs-string">"SELECT COUNT(*) FROM users;"</span>
+
+<span class="hljs-comment"># Test Redis per cada DB</span>
+redis<span class="hljs-literal">-cli</span> <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-n</span> <span class="hljs-number">0</span> ping  <span class="hljs-comment"># Producció</span>
+redis<span class="hljs-literal">-cli</span> <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-n</span> <span class="hljs-number">1</span> ping  <span class="hljs-comment"># Preproducció</span>
+redis<span class="hljs-literal">-cli</span> <span class="hljs-literal">-h</span> pcpc001 <span class="hljs-literal">-n</span> <span class="hljs-number">2</span> ping  <span class="hljs-comment"># Integració</span>
+</div></code></pre>
+<h3 id="83-test-frontend-a-trav%C3%A9s-dapache">8.3 Test Frontend a través d'Apache</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Test Frontend per cada entorn (ajustar ports segons configuració)</span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:8080"</span> <span class="hljs-literal">-UseBasicParsing</span>      <span class="hljs-comment"># Producció</span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:8081"</span> <span class="hljs-literal">-UseBasicParsing</span>      <span class="hljs-comment"># Preproducció</span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:8082"</span> <span class="hljs-literal">-UseBasicParsing</span>      <span class="hljs-comment"># Integració</span>
+
+<span class="hljs-comment"># Test API a través d'Apache</span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:8080/api/app/"</span> <span class="hljs-literal">-UseBasicParsing</span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:8081/api/app/"</span> <span class="hljs-literal">-UseBasicParsing</span>
+<span class="hljs-built_in">Invoke-WebRequest</span> <span class="hljs-literal">-Uri</span> <span class="hljs-string">"http://localhost:8082/api/app/"</span> <span class="hljs-literal">-UseBasicParsing</span>
+</div></code></pre>
+<h3 id="84-test-de-logs-i-configuracions">8.4 Test de Logs i Configuracions</h3>
+<pre class="hljs"><code><div><span class="hljs-comment"># Verificar que es generen logs per entorn</span>
+<span class="hljs-built_in">Get-Content</span> <span class="hljs-string">"C:\logs\gisquick\prod\backend.log"</span> <span class="hljs-literal">-Tail</span> <span class="hljs-number">10</span>
+<span class="hljs-built_in">Get-Content</span> <span class="hljs-string">"C:\logs\gisquick\pre\backend.log"</span> <span class="hljs-literal">-Tail</span> <span class="hljs-number">10</span>
+<span class="hljs-built_in">Get-Content</span> <span class="hljs-string">"C:\logs\gisquick\int\backend.log"</span> <span class="hljs-literal">-Tail</span> <span class="hljs-number">10</span>
+
+<span class="hljs-comment"># Verificar fitxers de configuració</span>
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"C:\gisquick-qvista\environments\prod\config.yaml"</span>
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"C:\gisquick-qvista\environments\pre\config.yaml"</span>
+<span class="hljs-built_in">Test-Path</span> <span class="hljs-string">"C:\gisquick-qvista\environments\int\config.yaml"</span>
+</div></code></pre>
+<hr>
+<h2 id="%F0%9F%93%9E-contacte-i-suport">📞 Contacte i Suport</h2>
+<h3 id="informaci%C3%B3-de-contacte">Informació de Contacte</h3>
+<ul>
+<li><strong>Responsable Tècnic:</strong> Jordi Fontán</li>
+<li><strong>Email:</strong> [email_tecnic]</li>
+<li><strong>Documentació:</strong> <code>C:\gisquick-qvista\docs\</code></li>
+</ul>
+<h3 id="recursos-adicionals">Recursos Adicionals</h3>
+<ul>
+<li><strong>Logs del sistema:</strong> <code>C:\logs\gisquick\</code></li>
+<li><strong>Configuracions:</strong>
+<ul>
+<li>Producció: <code>C:\gisquick-qvista\environments\prod\config.yaml</code></li>
+<li>Preproducció: <code>C:\gisquick-qvista\environments\pre\config.yaml</code></li>
+<li>Integració: <code>C:\gisquick-qvista\environments\int\config.yaml</code></li>
+</ul>
+</li>
+<li><strong>Executables:</strong> <code>C:\gisquick-qvista\server\gisquick-server.exe</code></li>
+</ul>
+<h3 id="ports-i-serveis">Ports i Serveis</h3>
+<table>
+<thead>
+<tr>
+<th>Servei</th>
+<th>Port Exemple</th>
+<th>Descripció</th>
+<th>Estat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apache HTTP (Prod)</td>
+<td>8080</td>
+<td>Frontend i proxy producció</td>
+<td>A configurar</td>
+</tr>
+<tr>
+<td>Apache HTTP (Pre)</td>
+<td>8081</td>
+<td>Frontend i proxy preproducció</td>
+<td>A configurar</td>
+</tr>
+<tr>
+<td>Apache HTTP (Int)</td>
+<td>8082</td>
+<td>Frontend i proxy integració</td>
+<td>A configurar</td>
+</tr>
+<tr>
+<td>Backend Go (Prod)</td>
+<td>3000</td>
+<td>API producció</td>
+<td>A configurar</td>
+</tr>
+<tr>
+<td>Backend Go (Pre)</td>
+<td>4000</td>
+<td>API preproducció</td>
+<td>A configurar</td>
+</tr>
+<tr>
+<td>Backend Go (Int)</td>
+<td>5000</td>
+<td>API integració</td>
+<td>A configurar</td>
+</tr>
+<tr>
+<td>QGIS Server FastCGI</td>
+<td>8080</td>
+<td>Servidor QGIS</td>
+<td>✓ Funcionant</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>5432</td>
+<td>Base de dades (pcpc001)</td>
+<td>✓ Funcionant</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>6379</td>
+<td>Cache (pcpc001)</td>
+<td>✓ Funcionant</td>
+</tr>
+</tbody>
+</table>
+<h3 id="notes-importants">Notes Importants</h3>
+<ul>
+<li><strong>Ports:</strong> Ajustar els ports d'Apache segons disponibilitat del sistema</li>
+<li><strong>Configuracions:</strong> Cada entorn té el seu directori amb <code>config.yaml</code> independent</li>
+<li><strong>Base de Dades:</strong> Esquema complet creat amb usuari administrador per defecte</li>
+<li><strong>Redis:</strong> Bases de dades separades per entorn (0=prod, 1=pre, 2=int)</li>
+</ul>
+<hr>
+<p><strong>Aquest manual proporciona les instruccions essencials per instal·lar i configurar el backend Gisquick-QVista en un entorn Windows Server amb múltiples instàncies, utilitzant els serveis Apache, PostgreSQL i Redis ja existents.</strong></p>
+
+</body>
+</html>

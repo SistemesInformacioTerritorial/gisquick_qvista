@@ -138,12 +138,54 @@ export default {
       }
     }
   },
+  watch: {
+    // CRÍTICO: Observar cambios en el proyecto
+    project: {
+      handler(newProject, oldProject) {
+        console.log('🔄 [SearchTool] Project changed');
+        console.log('🔄 New project:', newProject);
+        console.log('🔄 Old project:', oldProject);
+        
+        if (newProject && newProject !== oldProject) {
+          this.$nextTick(() => {
+            this.initSpecificSearches();
+          });
+        }
+      },
+      deep: true,
+      immediate: true
+    },
+    
+    // Observar cambios específicos en las capas
+    'project.layers': {
+      handler(newLayers) {
+        console.log('🔄 [SearchTool] Project layers changed:', newLayers);
+        if (newLayers) {
+          this.$nextTick(() => {
+            this.initSpecificSearches();
+          });
+        }
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   created() {
+    console.log('🚀 [SearchTool] Component created');
     // Inicializar las búsquedas específicas
     this.initSpecificSearches()
   },
   mounted() {
+    console.log('🚀 [SearchTool] Component mounted');
+    console.log('🚀 Project at mount:', this.project);
+    
     this.initThematicSearch();
+    
+    // Forzar inicialización después del montaje
+    this.$nextTick(() => {
+      console.log('🚀 [SearchTool] NextTick - forcing init');
+      this.initSpecificSearches();
+    });
   },
   methods: {
     selectResult(result) {
@@ -235,13 +277,23 @@ export default {
       }
     },
     initSpecificSearches() {
+      console.log('🔍 [initSpecificSearches] Starting initialization');
+      console.log('🔍 Project:', this.project);
+      console.log('🔍 Project layers:', this.project?.layers);
+      
       this.specificSearches = []
       this.searchTypes = [{ value: 'normal', text: this.$gettext('Búsqueda normal') }]
       
       // Buscar capas con la variable qV_search
       if (this.project && this.project.layers) {
-        this.project.layers.forEach(layer => {
+        console.log('🔍 Processing', this.project.layers.length, 'layers');
+        
+        this.project.layers.forEach((layer, index) => {
+          console.log(`🔍 Checking layer ${index}:`, layer.name, 'qV_search:', layer.qV_search);
+          
           if (layer.qV_search) {
+            console.log('✅ Found qV_search in layer:', layer.name, 'value:', layer.qV_search);
+            
             // Parsear la variable qV_search
             const searchConfig = this.parseQVSearch(layer.qV_search, layer.name)
             if (searchConfig) {
@@ -250,37 +302,69 @@ export default {
                 value: searchConfig.id,
                 text: searchConfig.fieldText || searchConfig.id
               })
+              console.log('✅ Added search config:', searchConfig);
+            } else {
+              console.log('❌ Failed to parse qV_search for layer:', layer.name);
             }
+          } else {
+            console.log('⚪ No qV_search found in layer:', layer.name);
           }
         })
+      } else {
+        console.log('❌ No project or layers available');
+        console.log('❌ Project state:', {
+          project: this.project,
+          hasLayers: !!(this.project && this.project.layers)
+        });
       }
 
+      console.log('🏁 Final specific searches:', this.specificSearches);
+      console.log('🏁 Final search types:', this.searchTypes);
+      
+      // Actualizar placeholder inicial
       if (this.specificSearches.length > 0) {
         this.currentPlaceholder = this.tr.SearchAddress
+        console.log('✅ Specific searches enabled, placeholder updated');
+      } else {
+        console.log('⚪ No specific searches found, using default');
       }
     },
     parseQVSearch(qvSearch, layerName) {
       try {
-        // Patrón para extraer field, fieldText y desc
-        const fieldMatch = qvSearch.match(/field="([^"]+)"/)
-        const fieldTextMatch = qvSearch.match(/fieldtext="([^"]+)"/)
-        const descMatch = qvSearch.match(/desc="([^"]+)"/)
+        console.log('🔧 [parseQVSearch] Starting parse for layer:', layerName);
+        console.log('🔧 qV_search value:', qvSearch);
         
-        if (!fieldMatch) return null
+        // CRÍTICO: Buscar tanto fieldtext como fieldText (mayúscula/minúscula)
+        const fieldMatch = qvSearch.match(/field="([^"]+)"/);
+        const fieldTextMatch = qvSearch.match(/fieldText="([^"]+)"/) || qvSearch.match(/fieldtext="([^"]+)"/);
+        const descMatch = qvSearch.match(/desc="([^"]+)"/);
         
-        return {
+        console.log('🔧 Field match:', fieldMatch);
+        console.log('🔧 FieldText match:', fieldTextMatch);
+        console.log('🔧 Desc match:', descMatch);
+        
+        if (!fieldMatch) {
+          console.log('❌ No field match found, returning null');
+          return null;
+        }
+        
+        const result = {
           id: layerName, // Usar el nombre de la capa como ID
           layerName: layerName,
           field: fieldMatch[1],
           fieldText: fieldTextMatch ? fieldTextMatch[1] : layerName,
-          desc: descMatch ? descMatch[1] : '',
-        }
+          desc: descMatch ? descMatch[1] : `Cercar a ${layerName}`,
+        };
+        
+        console.log('✅ Parsed qV_search result:', result);
+        return result;
       } catch (err) {
-        console.error('Error parsing qV_search variable:', err)
-        return null
+        console.error('❌ Error parsing qV_search variable:', err);
+        return null;
       }
     },
     onSearchTypeChange() {
+      console.log('🔄 Search type changed to:', this.selectedSearchType);
       this.clear()
       
       // Actualizar el placeholder según el tipo de búsqueda seleccionado
@@ -294,14 +378,22 @@ export default {
           this.currentPlaceholder = this.tr.SearchLocation
         }
       }
+      console.log('🔄 Placeholder updated to:', this.currentPlaceholder);
     },
     specificLayerSearch(searchTypeId) {
       const searchConfig = this.specificSearches.find(s => s.id === searchTypeId)
-      if (!searchConfig) return null
+      if (!searchConfig) {
+        console.log('❌ No search config found for:', searchTypeId);
+        return null;
+      }
+      
+      console.log('🔍 Creating specific layer search for:', searchConfig);
       
       return {
         autocomplete: async (text) => {
           try {
+            console.log('🔍 Specific search autocomplete for:', text, 'in layer:', searchConfig.layerName);
+            
             if (text.length < 2) return [] // Requiere mínimo 2 caracteres
             
             // Buscar la capa en el mapa
@@ -315,11 +407,15 @@ export default {
             })
             
             if (!targetLayer) {
+              console.log('❌ Layer not found:', searchConfig.layerName);
               throw new Error(`Capa "${searchConfig.layerName}" no encontrada`)
             }
             
+            console.log('✅ Target layer found:', targetLayer);
+            
             // Verificar si la capa está activada, si no lo está, activarla
             if (!targetLayer.getVisible()) {
+              console.log('🔄 Activating layer:', searchConfig.layerName);
               targetLayer.setVisible(true)
             }
             
@@ -344,17 +440,20 @@ export default {
               }
             })
             
+            console.log('🔍 Found', suggestions.length, 'suggestions for:', text);
+            
             // Limitar a 10 resultados y ordenar alfabéticamente
             return Object.freeze(suggestions
               .sort((a, b) => a.text.localeCompare(b.text))
               .slice(0, 10))
           } catch (error) {
-            console.error('Error en búsqueda específica:', error)
+            console.error('❌ Error en búsqueda específica:', error)
             throw new Error(this.$gettext('Error en la búsqueda específica'))
           }
         },
         
         getFeature: async (item) => {
+          console.log('🎯 Getting feature for item:', item);
           this.text = item.text
           
           // Crear una copia de la feature con su geometría original

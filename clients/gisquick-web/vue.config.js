@@ -54,12 +54,16 @@ module.exports = defineConfig({
     onBeforeSetupMiddleware (devServer) {
       const ErrorsModule = require('./proxy-interceptors.js')
       devServer.app.use('/', ErrorsModule({ config: './proxy-errors.js'}))
-    },
-    proxy: {
+    },    proxy: {
       '^/api': {
-        target: 'http://localhost:5000', // local server
-       // target: 'http://localhost',
-       // target: 'https://gisquick.nexusgeografics.com/',
+        // ENTORNS DISPONIBLES:
+        // target: 'http://localhost:3000',  // PRODUCCIÓ (port 80)
+        // target: 'http://localhost:4000',  // PRE (port 81)
+        target: 'http://localhost',     // INTEGRACIÓ (port 82) - ACTIU
+        
+        // Altres entorns:
+        // target: 'http://localhost',
+        // target: 'https://gisquick.nexusgeografics.com/',
         onProxyReq (proxyReq, req) {
           // restream body when body-parser was used
           if (req.body && parseInt(req.headers['content-length']) !== 0) {
