@@ -98,7 +98,7 @@ export default {
       selectedSearchType: 'normal',
       specificSearches: [], // Almacenará las búsquedas específicas
       searchTypes: [
-        { value: 'normal', text: this.$gettext('Búsqueda normal') }
+        { value: 'normal', text: this.$gettext('Cerca normal') }
       ],
       currentPlaceholder: ''
     }
@@ -136,10 +136,59 @@ export default {
         SearchAddress: this.$gettext('Search address'),
         SearchLocation: this.$gettext('Search location'),
       }
+    },
+    // CRÍTICO: Acceder correctamente a las capas desde la estructura real del store
+    projectLayers() {
+      console.log('🔎 [projectLayers] Checking project structure:', this.project);
+      
+      // Verificar diferentes estructuras posibles
+      let layers = null;
+      
+      if (this.project) {
+        // Opción 1: project.overlays.list (estructura actual de Gisquick)
+        if (this.project.overlays && this.project.overlays.list) {
+          layers = this.project.overlays.list;
+          console.log('🔎 Found layers at project.overlays.list:', layers);
+          console.log('🔎 overlays.list type:', typeof layers);
+          console.log('🔎 overlays.list is array:', Array.isArray(layers));
+          
+          // Si overlays.list es un objeto, convertir a array
+          if (typeof layers === 'object' && !Array.isArray(layers)) {
+            layers = Object.values(layers);
+            console.log('🔎 Converted object to array:', layers);
+          }
+        }
+        // Opción 2: project.overlays.tree (estructura de árbol)
+        else if (this.project.overlays && this.project.overlays.tree) {
+          layers = this.project.overlays.tree;
+          console.log('🔎 Found layers at project.overlays.tree:', layers);
+        }
+        // Opción 3: project.config.layers
+        else if (this.project.config && this.project.config.layers) {
+          layers = this.project.config.layers;
+          console.log('🔎 Found layers at project.config.layers:', layers);
+        }
+        // Opción 4: project.layers (esperado original)
+        else if (this.project.layers) {
+          layers = this.project.layers;
+          console.log('🔎 Found layers at project.layers:', layers);
+        }
+        // Opción 5: project.overlays directamente (si es array)
+        else if (this.project.overlays && Array.isArray(this.project.overlays)) {
+          layers = this.project.overlays;
+          console.log('🔎 Found layers at project.overlays:', layers);
+        }
+      }
+
+      console.log('🔎 Final layers found:', layers);
+      console.log('🔎 Final layers type:', typeof layers);
+      console.log('🔎 Final layers is array:', Array.isArray(layers));
+      
+      return layers || [];
     }
   },
   watch: {
-    // CRÍTICO: Observar cambios en el proyecto
+    // CRÍTICO: Observar cambios en el proyecto y en las capas computadas
     project: {
       handler(newProject, oldProject) {
         console.log('🔄 [SearchTool] Project changed');
@@ -156,11 +205,11 @@ export default {
       immediate: true
     },
     
-    // Observar cambios específicos en las capas
-    'project.layers': {
+    // Observar cambios en las capas computadas
+    projectLayers: {
       handler(newLayers) {
         console.log('🔄 [SearchTool] Project layers changed:', newLayers);
-        if (newLayers) {
+        if (newLayers && newLayers.length > 0) {
           this.$nextTick(() => {
             this.initSpecificSearches();
           });
@@ -279,42 +328,83 @@ export default {
     initSpecificSearches() {
       console.log('🔍 [initSpecificSearches] Starting initialization');
       console.log('🔍 Project:', this.project);
-      console.log('🔍 Project layers:', this.project?.layers);
+      console.log('🔍 Project layers (computed):', this.projectLayers);
+      
+      // NEW: Add detailed project structure debugging
+      if (this.project) {
+        console.log('🔍 Project keys:', Object.keys(this.project));
+        console.log('🔍 Project.overlays:', this.project.overlays);
+        console.log('🔍 Project.config:', this.project.config);
+        if (this.project.overlays) {
+          console.log('🔍 Overlays type:', typeof this.project.overlays);
+          console.log('🔍 Overlays is array:', Array.isArray(this.project.overlays));
+          console.log('🔍 Overlays keys:', Object.keys(this.project.overlays));
+          
+          // Log the different overlay properties
+          if (this.project.overlays.list) {
+            console.log('🔍 Overlays.list:', this.project.overlays.list);
+            console.log('🔍 Overlays.list type:', typeof this.project.overlays.list);
+            console.log('🔍 Overlays.list is array:', Array.isArray(this.project.overlays.list));
+            
+            // Log first layer for inspection
+            if (typeof this.project.overlays.list === 'object') {
+              const firstLayerKey = Object.keys(this.project.overlays.list)[0];
+              if (firstLayerKey) {
+                console.log('🔍 First layer:', this.project.overlays.list[firstLayerKey]);
+                console.log('🔍 First layer qV_search:', this.project.overlays.list[firstLayerKey].qV_search);
+              }
+            }
+          }
+        }
+      }
       
       this.specificSearches = []
-      this.searchTypes = [{ value: 'normal', text: this.$gettext('Búsqueda normal') }]
+      this.searchTypes = [{ value: 'normal', text: this.$gettext('Cerca normal') }]
       
-      // Buscar capas con la variable qV_search
-      if (this.project && this.project.layers) {
-        console.log('🔍 Processing', this.project.layers.length, 'layers');
+      // Usar las capas del computed property
+      const layers = this.projectLayers;
+      
+      console.log('🔍 Processing layers:', layers);
+      console.log('🔍 Layers type:', typeof layers);
+      console.log('🔍 Layers is array:', Array.isArray(layers));
+      console.log('🔍 Layers length:', layers ? layers.length : 0);
+      
+      if (layers && Array.isArray(layers) && layers.length > 0) {
+        console.log('🔍 Processing', layers.length, 'layers');
         
-        this.project.layers.forEach((layer, index) => {
-          console.log(`🔍 Checking layer ${index}:`, layer.name, 'qV_search:', layer.qV_search);
+        layers.forEach((layer, index) => {
+          console.log(`🔍 [Layer ${index}] Processing:`, layer);
+          console.log(`🔍 [Layer ${index}] Layer name:`, layer.name);
+          console.log(`🔍 [Layer ${index}] Layer qV_search:`, layer.qV_search);
           
-          if (layer.qV_search) {
-            console.log('✅ Found qV_search in layer:', layer.name, 'value:', layer.qV_search);
+          if (layer && layer.qV_search) {
+            console.log(`🔍 [Layer ${index}] Found qV_search:`, layer.qV_search);
             
-            // Parsear la variable qV_search
-            const searchConfig = this.parseQVSearch(layer.qV_search, layer.name)
+            const searchConfig = this.parseQVSearch(layer.qV_search, layer.name);
             if (searchConfig) {
-              this.specificSearches.push(searchConfig)
+              console.log(`🔍 [Layer ${index}] Parsed config:`, searchConfig);
+              
+              this.specificSearches.push(searchConfig);
               this.searchTypes.push({
                 value: searchConfig.id,
                 text: searchConfig.fieldText || searchConfig.id
-              })
-              console.log('✅ Added search config:', searchConfig);
-            } else {
-              console.log('❌ Failed to parse qV_search for layer:', layer.name);
+              });
+              
+              console.log(`✅ Added specific search for layer: ${layer.name}`);
             }
           } else {
-            console.log('⚪ No qV_search found in layer:', layer.name);
+            console.log(`🔍 [Layer ${index}] No qV_search found for layer:`, layer.name || 'unknown');
           }
-        })
+        });
       } else {
         console.log('❌ No project or layers available');
         console.log('❌ Project state:', {
           project: this.project,
-          hasLayers: !!(this.project && this.project.layers)
+          projectLayers: this.projectLayers,
+          layersType: typeof layers,
+          layersIsArray: Array.isArray(layers),
+          layersLength: layers ? layers.length : 0,
+          hasLayers: !!(layers && ((Array.isArray(layers) && layers.length > 0)))
         });
       }
 
