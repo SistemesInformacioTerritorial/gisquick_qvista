@@ -496,11 +496,13 @@ export default {
               
               let found = null;
               layerCollection.forEach(layer => {
-                // Verificar si esta es la capa que buscamos
+                // Obtener nombre de la capa
                 const layerName = layer.get('name');
                 console.log('🔍 Checking layer:', layerName);
                 
-                if (layerName === searchConfig.layerName) {
+                // Normalizar ambos nombres para la comparación
+                if (normalizeLayerName(layerName) === normalizeLayerName(searchConfig.layerName)) {
+                  console.log('✅ Found layer by normalized name:', layerName);
                   found = layer;
                   return;
                 }
@@ -749,6 +751,14 @@ export default {
       }
     },
   },
+}
+
+// Función auxiliar para normalizar nombres
+function normalizeLayerName(name) {
+  if (!name) return '';
+  return name.toString().toLowerCase()
+    .replace(/[\s-_]+/g, '') // Eliminar espacios, guiones y guiones bajos
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
 }
 </script>
 
