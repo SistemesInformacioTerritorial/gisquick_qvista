@@ -486,19 +486,44 @@ export default {
             
             if (text.length < 2) return [] // Requiere mínimo 2 caracteres
             
-            // Buscar la capa en el mapa
+            // Buscar la capa en el mapa - MÉTODO MEJORADO
             const map = this.$map
             let targetLayer = null
             
-            map.getLayers().forEach(layer => {
-              if (layer.get('name') === searchConfig.layerName) {
-                targetLayer = layer
-              }
-            })
+            // Función recursiva para buscar en todos los niveles de capas
+            function findLayerRecursive(layerCollection) {
+              if (!layerCollection) return null;
+              
+              let found = null;
+              layerCollection.forEach(layer => {
+                // Verificar si esta es la capa que buscamos
+                const layerName = layer.get('name');
+                console.log('🔍 Checking layer:', layerName);
+                
+                if (layerName === searchConfig.layerName) {
+                  found = layer;
+                  return;
+                }
+                
+                // Si la capa tiene subcapas, buscar recursivamente
+                const sublayers = layer.getLayers ? layer.getLayers() : null;
+                if (sublayers) {
+                  const subfound = findLayerRecursive(sublayers);
+                  if (subfound) found = subfound;
+                }
+              });
+              
+              return found;
+            }
+            
+            // Buscar la capa en el mapa
+            targetLayer = findLayerRecursive(map.getLayers());
             
             if (!targetLayer) {
               console.log('❌ Layer not found:', searchConfig.layerName);
-              throw new Error(`Capa "${searchConfig.layerName}" no encontrada`)
+              console.log('❌ Available layers:');
+              map.getLayers().forEach(l => console.log('- ' + l.get('name')));
+              throw new Error(`Capa "${searchConfig.layerName}" no encontrada`);
             }
             
             console.log('✅ Target layer found:', targetLayer);
