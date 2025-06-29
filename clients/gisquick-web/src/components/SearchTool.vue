@@ -53,11 +53,11 @@
 
 <script>
 import axios from 'axios';
+import { toLonLat, fromLonLat, transformExtent } from 'ol/proj'
 import { mapState } from 'vuex'
 import debounce from 'lodash/debounce'
 import Point from 'ol/geom/Point'
 import Feature from 'ol/Feature'
-import { toLonLat, fromLonLat, transformExtent } from 'ol/proj'
 import VAutocomplete from '@/ui/Autocomplete.vue'
 import FeaturesViewer from '@/components/ol/FeaturesViewer.vue'
 
@@ -663,6 +663,122 @@ export default {
       }
       
       return suggestions.slice(0, 10);
+    },
+    // RESTAURAR: Métodos de servicios de búsqueda que funcionaban
+    barcelonaService() {
+      return {
+        autocomplete: async (text) => {
+          const [x, y] = this.$map.getView().getCenter()
+          const [lon, lat] = toLonLat([x, y], this.$map.getView().getProjection())
+          const projection = this.$map.getView().getProjection()
+          const response = await axios.get(`https://w33.bcn.cat/geoBCN/serveis/territori?q=${text}&max=8&out_proj=EPSG:4326`);
+          let suggestions = response.data.resultats.adreces
+          const carrers = response.data.resultats.vies
+          let isAdreca = false
+          if(text.match(/\d+$/)) isAdreca = true
+          if(carrers.length > 1 && !isAdreca) {
+            suggestions = carrers
+          } else if(suggestions.length === 1 && carrers && carrers.length > 1) {
+            suggestions = suggestions.concat(carrers)
+          }
+          suggestions.forEach(i => {
+            i.text = i.nomComplet
+            i.geom = new Point(fromLonLat([i.localitzacio.x, i.localitzacio.y], this.$map.getView().getProjection()))
+          });
+          return Object.freeze(suggestions)
+        },
+        getFeature: async (item) => {
+          this.text = item.text;
+          return new Feature({ geometry: item.geom })
+        }
+      }
+    },
+
+    arcgisService () {
+      const wkid = this.project.config.projection.split(':')?.[1]
+      const formatExtent = extent => {
+        const [ xmin, ymin, xmax, ymax ] = extent
+        return JSON.stringify({
+          xmin, ymin, xmax, ymax,
+          spatialReference: { wkid }
+        })
+      }
+      const formatLocation = coords => {
+        const [x, y] = coords
+        return JSON.stringify({
+          x: this.$map.ext.formatCoordinate(x),
+          y: this.$map.ext.formatCoordinate(y),
+          spatialReference: { wkid }
+        })
+      }
+      const projectExtent = formatExtent(this.project.config.project_extent)
+      return {
+        autocomplete: async (text) => {
+          const params = {
+            text,
+            location: formatLocation(this.$map.getView().getCenter()),
+            searchExtent: projectExtent,
+            maxSuggestions: 8,
+            f: 'json',
+            distance: 10000
+          }
+          const { data } = await this.$http.get(`/api/map/search/${this.project.config.name}/suggest`, { params })
+          return data.suggestions
+        },
+        getFeature: async (item) => {
+          const { text, magicKey } = item
+          const params = {
+            text,
+            magicKey: magicKey,
+            SingleLine: text,
+            searchExtent: projectExtent,
+            location: formatLocation(this.$map.getView().getCenter()),
+            outSR: wkid,
+            f: 'json'
+          }
+          const { data } = await this.$http.get(`/api/map/search/${this.project.config.name}/findAddressCandidates`, { params })
+          const result = data.candidates[0]
+          if (result) {
+            const { x, y } = result.location
+            return new Feature({ geometry: new Point([x, y]) })
+          }
+          return null
+        }
+      }
+    },
+
+    geoapifyService () {
+      return {
+        autocomplete: async (text) => {
+          const [x, y] = this.$map.getView().getCenter()
+          const [lon, lat] = toLonLat([x, y], this.$map.getView().getProjection())
+          const projectExtent = this.project.config.project_extent
+          const viewExtent = this.$map.getView().calculateExtent()
+          const filters = [
+            `rect:${transformExtent(projectExtent, this.$map.getView().getProjection(), 'EPSG:4326')}`
+          ]
+          const biases = [
+            `proximity:${lon},${lat}`,
+            `rect:${transformExtent(viewExtent, this.$map.getView().getProjection(), 'EPSG:4326')}`
+          ]
+          const params = {
+            text,
+            format: 'json',
+            filter: filters.join('|'),
+            bias: biases.join('|')
+          }
+          const { data } = await this.$http.get(`/api/map/search/${this.project.config.name}/autocomplete`, { params })
+          const suggestions = data.results
+          suggestions.forEach(i => {
+            i.text = i.formatted
+            i.geom = new Point(fromLonLat([i.lon, i.lat], this.$map.getView().getProjection()))
+          })
+          return Object.freeze(suggestions)
+        },
+        getFeature: async (item) => {
+          return new Feature({ geometry: item.geom })
+        }
+      }
     },
   },
 }
