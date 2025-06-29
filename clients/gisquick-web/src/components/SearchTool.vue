@@ -237,6 +237,14 @@ export default {
     });
   },
   methods: {
+    // Mover la función normalizeLayerName aquí
+    normalizeLayerName(name) {
+      if (!name) return '';
+      return name.toString().toLowerCase()
+        .replace(/[\s-_]+/g, '') // Eliminar espacios, guiones y guiones bajos
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
+    },
+    
     selectResult(result) {
       this.text = result;
       this.results = [];
@@ -424,16 +432,26 @@ export default {
         console.log('🔧 [parseQVSearch] Starting parse for layer:', layerName);
         console.log('🔧 qV_search value:', qvSearch);
         
-        // CRÍTICO: Buscar tanto fieldtext como fieldText (mayúscula/minúscula)
+        // CORREGIDO: Buscar el formato correcto con comillas dobles
         const fieldMatch = qvSearch.match(/field="([^"]+)"/);
-        const fieldTextMatch = qvSearch.match(/fieldText="([^"]+)"/) || qvSearch.match(/fieldtext="([^"]+)"/);
+        const fieldTextMatch = qvSearch.match(/fieldText="([^"]+)"/);
         const descMatch = qvSearch.match(/desc="([^"]+)"/);
         
-        console.log('🔧 Field match:', fieldMatch);
-        console.log('🔧 FieldText match:', fieldTextMatch);
+        // NUEVO: También buscar formato sin comillas (por si acaso)
+        const fieldMatchNoQuotes = qvSearch.match(/field=(\w+)/);
+        const fieldTextMatchNoQuotes = qvSearch.match(/fieldText=(\w+)/);
+        
+        console.log('🔧 Field match (quoted):', fieldMatch);
+        console.log('🔧 Field match (unquoted):', fieldMatchNoQuotes);
+        console.log('🔧 FieldText match (quoted):', fieldTextMatch);
+        console.log('🔧 FieldText match (unquoted):', fieldTextMatchNoQuotes);
         console.log('🔧 Desc match:', descMatch);
         
-        if (!fieldMatch) {
+        // Usar el match que funcione
+        const finalFieldMatch = fieldMatch || fieldMatchNoQuotes;
+        const finalFieldTextMatch = fieldTextMatch || fieldTextMatchNoQuotes;
+        
+        if (!finalFieldMatch) {
           console.log('❌ No field match found, returning null');
           return null;
         }
@@ -441,9 +459,9 @@ export default {
         const result = {
           id: layerName, // Usar el nombre de la capa como ID
           layerName: layerName,
-          field: fieldMatch[1],
-          fieldText: fieldTextMatch ? fieldTextMatch[1] : layerName,
-          desc: descMatch ? descMatch[1] : `Cercar a ${layerName}`,
+          field: finalFieldMatch[1],
+          fieldText: finalFieldTextMatch ? finalFieldTextMatch[1] : layerName,
+          desc: descMatch ? descMatch[1] : `Cercar per ${finalFieldTextMatch ? finalFieldTextMatch[1] : 'camp'}`,
         };
         
         console.log('✅ Parsed qV_search result:', result);
@@ -484,281 +502,169 @@ export default {
           try {
             console.log('🔍 Specific search autocomplete for:', text, 'in layer:', searchConfig.layerName);
             
-            if (text.length < 2) return [] // Requiere mínimo 2 caracteres
+            if (text.length < 2) return []
             
-            // Buscar la capa en el mapa - MÉTODO MEJORADO
-            const map = this.$map
-            let targetLayer = null
+            // SOLO buscar en los datos del store/memoria (como FeaturesTable)
+            return this.searchInStoreData(searchConfig, text);
             
-            // Función recursiva para buscar en todos los niveles de capas
-            function findLayerRecursive(layerCollection) {
-              if (!layerCollection) return null;
-              
-              let found = null;
-              layerCollection.forEach(layer => {
-                // Obtener nombre de la capa
-                const layerName = layer.get('name');
-                console.log('🔍 Checking layer:', layerName);
-                
-                // Normalizar ambos nombres para la comparación
-                if (normalizeLayerName(layerName) === normalizeLayerName(searchConfig.layerName)) {
-                  console.log('✅ Found layer by normalized name:', layerName);
-                  found = layer;
-                  return;
-                }
-                
-                // Si la capa tiene subcapas, buscar recursivamente
-                const sublayers = layer.getLayers ? layer.getLayers() : null;
-                if (sublayers) {
-                  const subfound = findLayerRecursive(sublayers);
-                  if (subfound) found = subfound;
-                }
-              });
-              
-              return found;
-            }
-            
-            // Buscar la capa en el mapa
-            targetLayer = findLayerRecursive(map.getLayers());
-            
-            if (!targetLayer) {
-              console.log('❌ Layer not found:', searchConfig.layerName);
-              console.log('❌ Available layers:');
-              map.getLayers().forEach(l => console.log('- ' + l.get('name')));
-              throw new Error(`Capa "${searchConfig.layerName}" no encontrada`);
-            }
-            
-            console.log('✅ Target layer found:', targetLayer);
-            
-            // Verificar si la capa está activada, si no lo está, activarla
-            if (!targetLayer.getVisible()) {
-              console.log('🔄 Activating layer:', searchConfig.layerName);
-              targetLayer.setVisible(true)
-            }
-            
-            // Obtener la fuente de datos de la capa
-            const source = targetLayer.getSource()
-            const suggestions = []
-            
-            // Filtrar features según el texto de búsqueda
-            const searchText = text.toLowerCase()
-            
-            source.forEachFeature(feature => {
-              const properties = feature.getProperties()
-              const fieldValue = properties[searchConfig.field]
-              
-              if (fieldValue && fieldValue.toString().toLowerCase().includes(searchText)) {
-                suggestions.push({
-                  text: fieldValue.toString(),
-                  feature: feature,
-                  originalFeature: feature,
-                  geom: feature.getGeometry()
-                })
-              }
-            })
-            
-            console.log('🔍 Found', suggestions.length, 'suggestions for:', text);
-            
-            // Limitar a 10 resultados y ordenar alfabéticamente
-            return Object.freeze(suggestions
-              .sort((a, b) => a.text.localeCompare(b.text))
-              .slice(0, 10))
           } catch (error) {
             console.error('❌ Error en búsqueda específica:', error)
-            throw new Error(this.$gettext('Error en la búsqueda específica'))
+            return [];
           }
         },
         
         getFeature: async (item) => {
           console.log('🎯 Getting feature for item:', item);
-          this.text = item.text
           
-          // Crear una copia de la feature con su geometría original
-          const featClone = new Feature({
-            geometry: item.geom,
-            properties: item.originalFeature ? item.originalFeature.getProperties() : {}
-          })
+          // Devolver la feature original que ya está en memoria
+          if (item.originalFeature) {
+            // Destacar la feature si hay método de highlight
+            if (this.highlightFeature) {
+              this.highlightFeature(item.originalFeature)
+            }
+            return item.originalFeature;
+          }
           
-          // Destacar la feature (esto dependerá de cómo manejas el resaltado en tu app)
-          this.highlightFeature(item.originalFeature)
-          
-          return featClone
+          return item.feature;
         }
       }
     },
-    highlightFeature(feature) {
-      // Implementar según tu sistema de resaltado
-      // Ejemplo:
-      if (this.$map && this.$map.ext && this.$map.ext.highlightFeature) {
-        this.$map.ext.highlightFeature(feature)
+
+    // MÉTODO CORREGIDO: Buscar en los datos del store (como FeaturesTable)
+    searchInStoreData(searchConfig, text) {
+      console.log('🔍 ==================== BÚSQUEDA ESPECÍFICA ====================');
+      console.log('🔍 Buscando en:', searchConfig.layerName);
+      console.log('🔍 Campo:', searchConfig.field);
+      console.log('🔍 Texto:', text);
+      
+      const suggestions = [];
+      const searchText = text.toLowerCase();
+      
+      // **ESTRATEGIA 1**: Usar las features del store attributeTable (como hace FeaturesTable)
+      console.log('🔍 STRATEGY 1: Checking attributeTable store...');
+      
+      if (this.$store.state.attributeTable && this.$store.state.attributeTable.features) {
+        console.log('✅ Found attributeTable.features:', this.$store.state.attributeTable.features.length);
+        
+        const features = this.$store.state.attributeTable.features;
+        const currentLayer = this.$store.state.attributeTable.layer;
+        
+        console.log('🔍 Current attributeTable layer:', currentLayer?.name);
+        console.log('🔍 Target layer:', searchConfig.layerName);
+        
+        // Verificar si la capa actual es la que buscamos
+        if (currentLayer && (
+          currentLayer.name === searchConfig.layerName ||
+          this.normalizeLayerName(currentLayer.name) === this.normalizeLayerName(searchConfig.layerName)
+        )) {
+          console.log('✅ PERFECT MATCH! Using attributeTable features');
+          
+          features.forEach((feature, index) => {
+            const properties = feature.getProperties();
+            const fieldValue = properties[searchConfig.field];
+            
+            console.log(`🔍 Feature ${index} field value (${searchConfig.field}):`, fieldValue);
+            
+            if (fieldValue && fieldValue.toString().toLowerCase().includes(searchText)) {
+              suggestions.push({
+                text: fieldValue.toString(),
+                originalFeature: feature,
+                feature: feature,
+                properties: properties,
+                layerName: searchConfig.layerName,
+                source: 'attributeTable'
+              });
+              console.log(`✅ Added suggestion: ${fieldValue}`);
+            }
+          });
+          
+          console.log('🔍 Found', suggestions.length, 'suggestions in attributeTable');
+          return suggestions.slice(0, 10);
+        }
       }
-    },
-    thematicSearchService(searchTypeId) {
-      const searchConfig = THEMATIC_SEARCHES_CONFIG[searchTypeId];
       
-      if (!searchConfig) return null;
+      // **ESTRATEGIA 2**: Si no hay tabla activa, activarla automáticamente (como hace LayersTree)
+      console.log('🔍 STRATEGY 2: Auto-activating attribute table...');
       
-      return {
-        autocomplete: async (text) => {
-          try {
-            const response = await axios.get(searchConfig.url, {
-              params: {
-                q: text,
-                max: 8,
-                out_proj: "EPSG:4326",
-                ...searchConfig.params
+      // Buscar la capa en el proyecto
+      const targetLayer = this.projectLayers.find(layer =>
+        layer.name === searchConfig.layerName ||
+        this.normalizeLayerName(layer.name) === this.normalizeLayerName(searchConfig.layerName)
+      );
+      
+      if (targetLayer) {
+        console.log('✅ Found target layer in project:', targetLayer);
+        
+        // **CLAVE**: Activar la tabla de atributos automáticamente (igual que showAttributesTable)
+        this.$store.commit('attributeTable/layer', targetLayer);
+        
+        console.log('🔄 Activated attributeTable for layer:', targetLayer.name);
+        console.log('💡 NOTA: La búsqueda funcionará después de que se cargue la tabla');
+        
+        // Devolver mensaje informativo
+        return [{
+          text: `Cargando datos de "${targetLayer.title || targetLayer.name}"...`,
+          info: true,
+          loading: true,
+          message: 'Activa la tabla de atributos primero o vuelve a buscar en unos segundos'
+        }];
+      }
+      
+      // **ESTRATEGIA 3**: Verificar otras fuentes de datos (como en FeaturesTable)
+      console.log('🔍 STRATEGY 3: Checking other data sources...');
+      
+      // Buscar en los datos de identificación si están disponibles
+      if (this.$parent && this.$parent.$refs && this.$parent.$refs.tools) {
+        const toolsComponent = this.$parent.$refs.tools;
+        
+        if (toolsComponent.layersFeatures) {
+          console.log('🔍 Found layersFeatures in tools');
+          
+          const layerData = toolsComponent.layersFeatures.find(item =>
+            item.layer && (
+              item.layer.name === searchConfig.layerName ||
+              this.normalizeLayerName(item.layer.name) === this.normalizeLayerName(searchConfig.layerName)
+            )
+          );
+          
+          if (layerData && layerData.features) {
+            console.log('✅ Found layer data in tools with', layerData.features.length, 'features');
+            
+            layerData.features.forEach((feature, index) => {
+              const properties = feature.getProperties();
+              const fieldValue = properties[searchConfig.field];
+              
+              if (fieldValue && fieldValue.toString().toLowerCase().includes(searchText)) {
+                suggestions.push({
+                  text: fieldValue.toString(),
+                  originalFeature: feature,
+                  feature: feature,
+                  properties: properties,
+                  layerName: searchConfig.layerName,
+                  source: 'tools'
+                });
               }
             });
-            
-            let suggestions = [];
-            if (response.data && response.data.resultats) {
-              suggestions = searchConfig.resultPath 
-                ? response.data.resultats[searchConfig.resultPath] 
-                : response.data.resultats;
-              
-              suggestions.forEach(i => {
-                i.text = i[searchConfig.textField || 'nomComplet'];
-                const coords = searchConfig.coordsPath 
-                  ? [i[searchConfig.coordsPath].x, i[searchConfig.coordsPath].y]
-                  : [i.localitzacio.x, i.localitzacio.y];
-                i.geom = new Point(fromLonLat(coords, this.$map.getView().getProjection()));
-              });
-            }
-            return Object.freeze(suggestions);
-          } catch (error) {
-            console.error("Error en búsqueda temática:", error);
-            throw new Error(this.$gettext('Error en la búsqueda temática'));
           }
-        },
-        
-        getFeature: async (item) => {
-          this.text = item.text;
-          return new Feature({ geometry: item.geom });
-        }
-      };
-    },
-    barcelonaService() {
-      return {
-        autocomplete: async (text) => {
-          const [x, y] = this.$map.getView().getCenter()
-          const [lon, lat] = toLonLat([x, y], this.$map.getView().getProjection())
-          const projection = this.$map.getView().getProjection()
-          const response = await axios.get(`https://w33.bcn.cat/geoBCN/serveis/territori?q=${text}&max=8&out_proj=EPSG:4326`);
-          let suggestions = response.data.resultats.adreces
-          const carrers = response.data.resultats.vies
-          let isAdreca = false
-          if(text.match(/\d+$/)) isAdreca = true
-          if(carrers.length > 1 && !isAdreca) {
-            suggestions = carrers
-          } else if(suggestions.length === 1 && carrers && carrers.length > 1) {
-            suggestions = suggestions.concat(carrers)
-          }
-          suggestions.forEach(i => {
-            i.text = i.nomComplet
-            i.geom = new Point(fromLonLat([i.localitzacio.x, i.localitzacio.y], this.$map.getView().getProjection()))
-          });
-          return Object.freeze(suggestions)
-        },
-        getFeature: async (item) => {
-          this.text = item.text;
-          return new Feature({ geometry: item.geom })
         }
       }
-    },
-    arcgisService () {
-      const wkid = this.project.config.projection.split(':')?.[1]
-      const formatExtent = extent => {
-        const [ xmin, ymin, xmax, ymax ] = extent
-        return JSON.stringify({
-          xmin, ymin, xmax, ymax,
-          spatialReference: { wkid }
-        })
+      
+      console.log('🔍 ==================== RESULTADO FINAL ====================');
+      console.log(`🔍 Total suggestions found: ${suggestions.length}`);
+      suggestions.forEach((s, i) => console.log(`🔍 Suggestion ${i}: ${s.text} (from ${s.source})`));
+      
+      if (suggestions.length === 0) {
+        console.log('💡 TIP: Activa la tabla de atributos de la capa primero');
+        return [{
+          text: `No hay datos cargados para "${searchConfig.layerName}"`,
+          info: true,
+          message: 'Haz clic en el icono de tabla de atributos de la capa primero'
+        }];
       }
-      const formatLocation = coords => {
-        const [x, y] = coords
-        return JSON.stringify({
-          x: this.$map.ext.formatCoordinate(x),
-          y: this.$map.ext.formatCoordinate(y),
-          spatialReference: { wkid }
-        })
-      }
-      const projectExtent = formatExtent(this.project.config.project_extent)
-      return {
-        autocomplete: async (text) => {
-          const params = {
-            text,
-            location: formatLocation(this.$map.getView().getCenter()),
-            searchExtent: projectExtent,
-            maxSuggestions: 8,
-            f: 'json',
-            distance: 10000
-          }
-          const { data } = await this.$http.get(`/api/map/search/${this.project.config.name}/suggest`, { params })
-          return data.suggestions
-        },
-        getFeature: async (item) => {
-          const { text, magicKey } = item
-          const params = {
-            text,
-            magicKey: magicKey,
-            SingleLine: text,
-            searchExtent: projectExtent,
-            location: formatLocation(this.$map.getView().getCenter()),
-            outSR: wkid,
-            f: 'json'
-          }
-          const { data } = await this.$http.get(`/api/map/search/${this.project.config.name}/findAddressCandidates`, { params })
-          const result = data.candidates[0]
-          if (result) {
-            const { x, y } = result.location
-            return new Feature({ geometry: new Point([x, y]) })
-          }
-          return null
-        }
-      }
-    },
-    geoapifyService () {
-      return {
-        autocomplete: async (text) => {
-          const [x, y] = this.$map.getView().getCenter()
-          const [lon, lat] = toLonLat([x, y], this.$map.getView().getProjection())
-          const projectExtent = this.project.config.project_extent
-          const viewExtent = this.$map.getView().calculateExtent()
-          const filters = [
-            `rect:${transformExtent(projectExtent, this.$map.getView().getProjection(), 'EPSG:4326')}`
-          ]
-          const biases = [
-            `proximity:${lon},${lat}`,
-            `rect:${transformExtent(viewExtent, this.$map.getView().getProjection(), 'EPSG:4326')}`
-          ]
-          const params = {
-            text,
-            format: 'json',
-            filter: filters.join('|'),
-            bias: biases.join('|')
-          }
-          const { data } = await this.$http.get(`/api/map/search/${this.project.config.name}/autocomplete`, { params })
-          const suggestions = data.results
-          suggestions.forEach(i => {
-            i.text = i.formatted
-            i.geom = new Point(fromLonLat([i.lon, i.lat], this.$map.getView().getProjection()))
-          })
-          return Object.freeze(suggestions)
-        },
-        getFeature: async (item) => {
-          return new Feature({ geometry: item.geom })
-        }
-      }
+      
+      return suggestions.slice(0, 10);
     },
   },
-}
-
-// Función auxiliar para normalizar nombres
-function normalizeLayerName(name) {
-  if (!name) return '';
-  return name.toString().toLowerCase()
-    .replace(/[\s-_]+/g, '') // Eliminar espacios, guiones y guiones bajos
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
 }
 </script>
 
