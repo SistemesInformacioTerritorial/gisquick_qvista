@@ -30,6 +30,33 @@ export function filterLayers (items, test) {
   return list
 }
 
+// NUEVO: Función para precargar datos de capas con búsqueda específica
+async function preloadLayerData(store, project) {
+  if (!project?.overlays?.list) return
+  
+  const searchLayers = project.overlays.list.filter(layer => layer.qV_search)
+  console.log('🔄 Preloading data for layers with search:', searchLayers.length)
+  
+  for (const layer of searchLayers) {
+    try {
+      console.log(`🔄 Preloading ${layer.name}...`)
+      
+      // Usar la misma lógica que AttributesTable
+      store.commit('attributeTable/layer', layer)
+      
+      // Activar la capa si no está visible
+      if (!layer.visible) {
+        store.commit('layerVisibility', { layer, visible: true })
+      }
+      
+      // Aquí podrías añadir lógica para cargar datos via WFS si es necesario
+      
+    } catch (error) {
+      console.warn(`⚠️ Failed to preload ${layer.name}:`, error)
+    }
+  }
+}
+
 export default new Vuex.Store({
   strict: process.env.NODE_ENV === 'development',
   modules: {
@@ -93,6 +120,11 @@ export default new Vuex.Store({
         })
       })
       state.project = projectData
+      
+      // NUEVO: Precargar datos después de configurar el proyecto
+      if (projectData && projectData.overlays?.list?.some(l => l.qV_search)) {
+        setTimeout(() => preloadLayerData(this, projectData), 1000)
+      }
     },
     activeTool (state, name) {
       state.activeTool = name

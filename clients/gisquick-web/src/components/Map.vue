@@ -102,6 +102,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import { createSearchDataPreloadService } from '@/services/SearchDataPreloadService'
 
 import Map from '@/mixins/Map'
 import ContentPanel from '@/components/content-panel/ContentPanel.vue'
@@ -134,12 +135,18 @@ export default {
       return tools.filter(t => !t.disabled)
     }
   },
-  created () {
+  created() {
     this.$root.$panel = {
       setStatusBarVisible: (visible) => {
         this.statusBarVisible = visible
       }
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      // Comentamos la inicialización del servicio de precarga
+      // this.searchDataPreloadService = createSearchDataPreloadService(this.$http, this.$map, this.$store);
+    });
   }
 }
 </script>
