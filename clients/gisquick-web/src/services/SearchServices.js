@@ -148,15 +148,19 @@ export class SearchServices {
   }
 
   // NUEVO: Servicio de búsqueda WFS con XML
-  wfsXmlService(store) {
+  wfsXmlService(store, projectNameParam = null) {
     return {
-      autocomplete: async (searchConfig, text) => {
-        if (text.length < 2) return [];
-        
+      autocomplete: async (searchConfig, searchText) => {
         try {
-          console.log('🔍 [wfsXmlService] Buscando:', text, 'en capa:', searchConfig.layerName, 'campo:', searchConfig.field);
+          // CORREGIR: Usar config.name en lugar de config.project
+          const projectName = projectNameParam || store.state.project?.config?.name;
           
-          const searchText = text.toLowerCase();
+          if (!projectName) {
+            console.error('❌ No project name available for WFS search');
+            throw new Error('Nombre de proyecto no disponible');
+          }
+          
+          console.log('🔍 [wfsXmlService] Using project:', projectName);
           
           // Usar formato XML exacto que funciona
           const xmlRequest = `<GetFeature
@@ -175,9 +179,7 @@ export class SearchServices {
 </wfs:Query>
 </GetFeature>`;
           
-          const projectName = store.state.project?.config?.project || 'int/cultureta';
-          
-          // CORRECCIÓN: Añadir los parámetros necesarios a la URL
+          // CORRECCIÓN: Usar el nombre de proyecto dinámico
           const url = `/api/map/ows/${projectName}?VERSION=1.1.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=GeoJSON`;
           
           console.log('🔍 [wfsXmlService] URL:', url);

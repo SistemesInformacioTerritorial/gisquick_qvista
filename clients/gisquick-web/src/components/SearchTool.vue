@@ -340,7 +340,6 @@ export default {
       this.specificSearches = []
       this.searchTypes = [{ value: 'normal', text: this.$gettext('Cerca normal') }]
       
-      // Usar las capas del computed property
       const layers = this.projectLayers;
       
       if (layers && Array.isArray(layers) && layers.length > 0) {
@@ -349,24 +348,198 @@ export default {
         layers.forEach((layer, index) => {
           console.log(`🔍 [Layer ${index}] Processing:`, layer.name);
           
-          // NUEVO: Buscar todas las propiedades que empiezan con qV_search
-          const searchProperties = Object.keys(layer || {}).filter(key => 
+          // NUEVO: Buscar todas las propiedades que empiecen con qV_search
+          const searchProps = Object.keys(layer || {}).filter(key => 
             key.startsWith('qV_search')
           );
           
-          console.log(`🔍 [Layer ${index}] Found ${searchProperties.length} search properties:`, searchProperties);
+          console.log(`🔍 [Layer ${index}] Found ${searchProps.length} search properties:`, searchProps);
           
           // Procesar cada propiedad de búsqueda
-          searchProperties.forEach(propName => {
+          searchProps.forEach(propName => {
             const qvSearchValue = layer[propName];
             console.log(`🔍 [Layer ${index}] Processing ${propName}:`, qvSearchValue);
             
             // Generar un ID único para esta búsqueda
-            // Usar _1, _2, etc. al final si hay múltiples búsquedas
+            // Usar suffijo para diferenciar múltiples búsquedas de la misma capa
             const searchSuffix = propName === 'qV_search' ? '' : 
                                 '_' + propName.replace('qV_search_', '');
             
             const searchId = layer.name + searchSuffix;
             
             const searchConfig = this.parseQVSearch(qvSearchValue, layer.name, searchId);
-            if
+            if (searchConfig) {
+              console.log(`✅ Added search: ${searchConfig.fieldText} for layer: ${layer.name}`);
+              
+              this.specificSearches.push(searchConfig);
+              this.searchTypes.push({
+                value: searchConfig.id,
+                text: searchConfig.fieldText || searchConfig.id
+              });
+            }
+          });
+        });
+      }
+      
+      // Actualizar placeholder inicial
+      if (this.specificSearches.length > 0) {
+        this.currentPlaceholder = this.tr.SearchAddress;
+      }
+    },
+    parseQVSearch(qvSearch, layerName, searchId = null) {
+      try {
+        console.log('🔧 [parseQVSearch] Starting parse for layer:', layerName);
+        console.log('🔧 qV_search value:', qvSearch);
+        
+        const fieldMatch = qvSearch.match(/field="([^"]+)"/);
+        const fieldTextMatch = qvSearch.match(/fieldText="([^"]+)"/);
+        const descMatch = qvSearch.match(/desc="([^"]+)"/);
+        
+        const fieldMatchNoQuotes = qvSearch.match(/field=(\w+)/);
+        const fieldTextMatchNoQuotes = qvSearch.match(/fieldText=(\w+)/);
+        
+        const finalFieldMatch = fieldMatch || fieldMatchNoQuotes;
+        const finalFieldTextMatch = fieldTextMatch || fieldTextMatchNoQuotes;
+        
+        if (!finalFieldMatch) {
+          console.log('❌ No field match found, returning null');
+          return null;
+        }
+        
+        const result = {
+          // Usar el ID personalizado si se proporciona, de lo contrario, nombre de capa
+          id: searchId || layerName,
+          layerName: layerName,
+          field: finalFieldMatch[1],
+          fieldText: finalFieldTextMatch ? finalFieldTextMatch[1] : layerName,
+          desc: descMatch ? descMatch[1] : `Cercar per ${finalFieldTextMatch ? finalFieldTextMatch[1] : 'camp'}`,
+        };
+        
+        console.log('✅ Parsed qV_search result:', result);
+        return result;
+      } catch (err) {
+        console.error('❌ Error parsing qV_search variable:', err);
+        return null;
+      }
+    },
+    onSearchTypeChange() {
+      console.log('🔄 Search type changed to:', this.selectedSearchType);
+      this.clear()
+      
+      // Actualizar el placeholder según el tipo de búsqueda seleccionado
+      if (this.selectedSearchType === 'normal') {
+        this.currentPlaceholder = this.tr.SearchAddress
+      } else {
+        const searchConfig = this.specificSearches.find(s => s.id === this.selectedSearchType)
+        if (searchConfig && searchConfig.desc) {
+          this.currentPlaceholder = searchConfig.desc
+        } else {
+          this.currentPlaceholder = this.tr.SearchLocation
+        }
+      }
+      console.log('🔄 Placeholder updated to:', this.currentPlaceholder);
+    },
+    specificLayerSearch(searchTypeId) {
+      const searchConfig = this.specificSearches.find(s => s.id === searchTypeId);
+      if (!searchConfig) {
+        console.log('❌ No search config found for:', searchTypeId);
+        return null;
+      }
+      
+      console.log('🔍 Creating specific layer search for:', searchConfig);
+      
+      // Obtener el servicio WFS XML
+      const currentProject = this.project?.config?.name;
+      const wfsService = this.searchServices.wfsXmlService(this.$store, currentProject);
+      
+      return {
+        autocomplete: async (text) => {
+          try {
+            console.log('🔍 Specific search autocomplete for:', text, 'in layer:', searchConfig.layerName);
+            
+            if (text.length < 2) return [];
+            
+            // NUEVO: Usar el servicio WFS XML y retornar sus resultados directamente
+            const wfsResults = await wfsService.autocomplete(searchConfig, text);
+            
+            // Simplemente devolver los resultados, sin intentar búsqueda en el store
+            console.log('✅ Devolviendo resultados de WFS XML');
+            return wfsResults;
+            
+          } catch (error) {
+            console.error('❌ Error en búsqueda específica:', error);
+            
+            // Devolver un mensaje de error sin intentar búsqueda en el store
+            return [{
+              text: `Error: ${error.message}`,
+              info: true,
+              error: true
+            }];
+          }
+        },
+        
+        getFeature: async (item) => {
+          console.log('🎯 Getting feature for item:', item);
+          
+          // Si tiene source 'wfsXml', usar el getFeature del servicio WFS
+          if (item.source === 'wfsXml') {
+            return await wfsService.getFeature(item);
+          }
+          
+          if (item.originalFeature) {
+            return item.originalFeature;
+          }
+          
+          return item.feature;
+        }
+      };
+    },
+    
+    // Eliminar los métodos de servicio que ahora están en SearchServices.js
+    // (barcelonaService, arcgisService, geoapifyService)
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.search-tool {
+  margin-top: 7px;
+  margin-bottom: 7px;
+  --gutter: 0;
+  --fill-color: #3b3b3b;
+  --border-color: #5a5a5a;
+  border-radius: 4px;
+  background-color: #333;
+  .btn {
+    width: 32px;
+    height: 32px;
+  }
+  .i-field.autocomplete {
+    min-width: 280px;
+    ::v-deep {
+      .input {
+        height: 28px;
+      }
+    }
+  }
+  .i-field.select {
+    line-height: 28px;
+    min-width: 130px; // Ancho mínimo para mostrar bien los textos
+    font-size: 14px;
+    ::v-deep {
+      .input {
+        height: 28px;
+      }
+    }
+  }
+  .toolbar {
+    gap: 6px;
+    padding-right: 6px;
+  }
+}
+
+.search-type-select {
+  min-width: 120px;
+  margin-right: 5px;
+}
+</style>
