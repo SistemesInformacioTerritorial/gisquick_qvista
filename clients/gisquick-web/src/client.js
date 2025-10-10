@@ -52,6 +52,7 @@ HTTP.project = function (project) {
         } catch (err) {
           console.error('processing project customization config.', err)
         }
+        console.log(data, 'data')
         resolve(data)
       })
       .catch(err => {

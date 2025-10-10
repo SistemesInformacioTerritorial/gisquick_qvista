@@ -46,6 +46,50 @@
         </v-btn>
       </template>
 
+      <template v-slot:actions_nexus="{ row, item }">
+        <div class="f-row-ac">
+          <v-btn
+            v-if="item?.actions?.length <= 3"
+            v-for="action in item.actions"
+            :key="action.id"
+            class="icon flat my-0 mr-0"
+            @click="runActionMethod(action, item)"
+          >
+            <v-icon name="circle-i-outline" />
+            <v-tooltip slot="tooltip">{{ action.short_title }}</v-tooltip>
+          </v-btn>
+
+          <div class="tools-menu f-col f-justify-start"
+            v-if="item?.actions?.length > 3"
+          >
+            <v-btn class="icon flat" @click="toggleOpen(item.id, $event)">
+              <transition name="menu">
+                <v-icon v-if="isOpen(item.id)" key="x" name="x" />
+                <v-icon v-else name="menu" />
+              </transition>
+            </v-btn>
+
+            <portal to="body-portal">
+              <transition name="menu-items">
+                <div class="floating-list" v-if="isOpen(item.id)"
+                  :style="menuPosition[item.id]"
+                >
+                  <v-btn
+                    v-for="collapsedAction in item.actions"
+                    :key="collapsedAction.id"
+                    class="icon flat my-0 mr-0"
+                    @click="runActionMethod(collapsedAction, item)"
+                  >
+                    <v-icon name="circle-i-outline" />
+                    <v-tooltip slot="tooltip">{{ collapsedAction.short_title }}</v-tooltip>
+                  </v-btn>
+                </div>
+              </transition>
+            </portal>
+          </div>
+        </div>
+      </template>
+
       <template v-slot:toolbar>
         <div class="v-separator"/>
         <v-btn
@@ -94,6 +138,7 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import TabsHeader from '@/components/TabsHeader.vue'
 import AttributesTable from './TableView.vue'
 import InfoPanel from '@/components/InfoPanel.vue'
+import { runAction } from '@/ui/utils/extraActions'
 
 import { eventCoord, DragHandler } from '@/events'
 import ToolMixin from './tool.js'
@@ -106,6 +151,8 @@ export default {
     return {
       height: 242,
       minimized: false,
+      openRows: {},
+      menuPosition: {},
       resizing: false
     }
   },
@@ -128,6 +175,24 @@ export default {
     },
     fetchFeatures (page = 1, lastQuery = false) {
       this.$refs.table.fetchFeatures(page, lastQuery)
+    },
+    runActionMethod(action, item) {
+      runAction(action, item)
+    },
+    toggleOpen(id, event) {
+      this.$set(this.openRows, id, !this.openRows[id]);
+      if (this.openRows[id]) {
+        const rect = event?.currentTarget?.getBoundingClientRect?.() || {}
+        this.$set(this.menuPosition, id, {
+          position: 'absolute',
+          top: rect.bottom + 'px',
+          left: rect.left + 'px',
+          zIndex: 9
+        })
+      }
+    },
+    isOpen(id) {
+      return !!this.openRows[id];
     },
     resizeHandler (e) {
       if (this.minimized) {
@@ -192,6 +257,25 @@ export default {
     &::after {
       opacity: 1;
     }
+  }
+}
+.floating-list {
+  position: absolute;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  border-radius: 6px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  z-index: 9;
+}
+.tools-menu {
+  position: relative;
+  .btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    margin: 2px;
   }
 }
 </style>

@@ -119,6 +119,15 @@
       >
         <v-icon name="arrow-down" :class="{collapsed}"/>
       </v-btn>
+      <v-btn
+        v-for="collapsedAction in displayedData.feature.get('actions')"
+        :key="collapsedAction.id"
+        class="icon flat"
+        @click="runActionMethod(collapsedAction, item)"
+      >
+        <v-icon name="circle-i-outline" />
+        <v-tooltip slot="tooltip">{{ collapsedAction.short_title }}</v-tooltip>
+      </v-btn>
     </div>
   </div>
 </template>
@@ -131,6 +140,7 @@ import NewFeatureEditor from '@/components/feature-editor/NewFeatureEditor.vue'
 import FeaturesReader from '@/components/attributes-table/features.js'
 import { externalComponent } from '@/components-loader'
 import { ShallowArray, ShallowObj } from '@/utils'
+import { runAction } from '@/ui/utils/extraActions'
 
 export default {
   name: 'info-panel',
@@ -212,6 +222,9 @@ export default {
     }
   },
   methods: {
+    runActionMethod(action, item) {
+      runAction(action, item)
+    },
     setActiveLayer (layer) {
       this.$emit('update:layer', layer)
     },

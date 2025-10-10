@@ -56,6 +56,8 @@
       </div>
     </transition>
     <popup-layer class="light"/>
+
+    <portal-target name="body-portal" multiple />
   </div>
 </template>
 
@@ -92,7 +94,7 @@ export default {
     return {
       projectKey: 0,
       showInstallPrompt: false,
-      title: '', 
+      title: '',
     }
   },
   computed: {
@@ -114,7 +116,7 @@ export default {
     this.loadProject()
   },
   mounted () {
-   
+
     if (window.env.mobile) {
       const setHeightStyle = () => {
         const vh = window.innerHeight / 100

@@ -50,6 +50,7 @@
             </v-tooltip>
           </v-btn>
           <slot name="actions" :row="row" :item="item"/>
+          <slot name="actions_nexus" :row="row" :item="item" />
         </div>
       </template>
       <template v-for="(slot, name) in slots" v-slot:[`cell(${name})`]="{ item }">
@@ -172,6 +173,67 @@ export default {
   },
   computed: {
     selectedFeature () {
+      if(this.features?.length) {
+        const mockData0 = [{
+          "id": "{c1a995e2-f694-4f9c-bf83-3167747c28c0}",
+          "name": "Prova Acció",
+          "action_type": "5",
+          "action_text": "https://www.google.es/",
+          "short_title": "Prova Acció",
+          "layer_id": "7_GESTI__URBAN_STICA__TREBALLS_EN_CURS_69048f8a_b41e_4085_8005_69ac643a0442"
+        }, {
+          id: "2",
+          name: "Obrir Info",
+          action_type: "modal",
+          action_text: "",
+          short_title: "Info",
+          layer_id: "..."
+        }, {
+          id: "3",
+          name: "Obrir Info",
+          action_type: "modal",
+          action_text: "",
+          short_title: "Info",
+          layer_id: "..."
+        }, {
+          id: "4",
+          name: "Obrir Info",
+          action_type: "modal",
+          action_text: "",
+          short_title: "Info",
+          layer_id: "..."
+        }]
+
+        const mockData1 = [{
+          "id": "{c1a995e2-f694-4f9c-bf83-3167747c28c0}",
+          "name": "Prova Acció",
+          "action_type": "5",
+          "action_text": "https://www.google.es/",
+          "short_title": "Prova Acció",
+          "layer_id": "7_GESTI__URBAN_STICA__TREBALLS_EN_CURS_69048f8a_b41e_4085_8005_69ac643a0442"
+        }, {
+          id: "2",
+          name: "Obrir Info",
+          action_type: "modal",
+          action_text: "",
+          short_title: "Info",
+          layer_id: "..."
+        }, {
+          id: "3",
+          name: "Obrir Info",
+          action_type: "modal",
+          action_text: "",
+          short_title: "Info",
+          layer_id: "..."
+        }]
+
+        this.features[0].set('actions', mockData0)
+        this.tableData[0].actions = mockData0
+
+        this.features[1].set('actions', mockData1)
+        this.tableData[1].actions = mockData1
+      }
+
       return this.features.find(f => f.getId() === this.selectedId)
     },
     lastPage () {
