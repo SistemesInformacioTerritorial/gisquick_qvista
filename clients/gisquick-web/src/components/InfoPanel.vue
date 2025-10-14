@@ -123,9 +123,12 @@
         v-for="collapsedAction in displayedData.feature.get('actions')"
         :key="collapsedAction.id"
         class="icon flat"
-        @click="runActionMethod(collapsedAction, item)"
+        @click="runActionMethod(collapsedAction)"
       >
-        <v-icon name="circle-i-outline" />
+        <custom-icon
+          :name="getActionIcon(collapsedAction.action_type)"
+          class="svg-icon"
+        />
         <v-tooltip slot="tooltip">{{ collapsedAction.short_title }}</v-tooltip>
       </v-btn>
     </div>
@@ -141,10 +144,11 @@ import FeaturesReader from '@/components/attributes-table/features.js'
 import { externalComponent } from '@/components-loader'
 import { ShallowArray, ShallowObj } from '@/utils'
 import { runAction } from '@/ui/utils/extraActions'
+import CustomIcon from '@/components/CustomIcon.vue'
 
 export default {
   name: 'info-panel',
-  components: { GenericInfopanel, FeaturesViewer, FeatureEditor, NewFeatureEditor },
+  components: { GenericInfopanel, FeaturesViewer, FeatureEditor, NewFeatureEditor, CustomIcon },
   mixins: [FeaturesReader],
   props: {
     selected: Object,
@@ -222,8 +226,17 @@ export default {
     }
   },
   methods: {
-    runActionMethod(action, item) {
-      runAction(action, item)
+    getActionIcon (type) {
+      const iconMap = {
+        7: 'folder-image',
+        5: 'web',
+      }
+
+      console.log(type, 'tipo')
+      return iconMap[type] || 'fallback'
+    },
+    runActionMethod(action) {
+      runAction(action)
     },
     setActiveLayer (layer) {
       this.$emit('update:layer', layer)
@@ -397,5 +410,19 @@ export default {
       border-bottom-right-radius: 3px;
     }
   }
+}
+
+.svg-icon {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  vertical-align: middle;
+  color: currentColor;
+}
+
+.svg-icon svg {
+  width: 100% !important;
+  height: 100% !important;
+  fill: currentColor;
 }
 </style>

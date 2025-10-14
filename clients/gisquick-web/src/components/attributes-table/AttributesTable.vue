@@ -53,9 +53,12 @@
             v-for="action in item.actions"
             :key="action.id"
             class="icon flat my-0 mr-0"
-            @click="runActionMethod(action, item)"
+            @click="runActionMethod(action)"
           >
-            <v-icon name="circle-i-outline" />
+            <custom-icon
+              :name="getActionIcon(action.action_type)"
+              class="svg-icon"
+            />
             <v-tooltip slot="tooltip">{{ action.short_title }}</v-tooltip>
           </v-btn>
 
@@ -78,9 +81,12 @@
                     v-for="collapsedAction in item.actions"
                     :key="collapsedAction.id"
                     class="icon flat my-0 mr-0"
-                    @click="runActionMethod(collapsedAction, item)"
+                    @click="runActionMethod(collapsedAction)"
                   >
-                    <v-icon name="circle-i-outline" />
+                    <custom-icon
+                      :name="getActionIcon(collapsedAction.action_type)"
+                      class="svg-icon"
+                    />
                     <v-tooltip slot="tooltip">{{ collapsedAction.short_title }}</v-tooltip>
                   </v-btn>
                 </div>
@@ -142,11 +148,12 @@ import { runAction } from '@/ui/utils/extraActions'
 
 import { eventCoord, DragHandler } from '@/events'
 import ToolMixin from './tool.js'
+import CustomIcon from '@/components/CustomIcon.vue'
 
 export default {
   name: 'attribute-table-tool',
   mixins: [ToolMixin],
-  components: { TabsHeader, InfoPanel, AttributesTable },
+  components: { TabsHeader, InfoPanel, AttributesTable, CustomIcon },
   data () {
     return {
       height: 242,
@@ -170,14 +177,21 @@ export default {
     }
   },
   methods: {
+    getActionIcon (type) {
+      const iconMap = {
+        7: 'folder-image',
+        5: 'web',
+      }
+      return iconMap[type] || 'fallback'
+    },
     updateSelection (id) {
       this.selected = { layer: this.layer.name, id }
     },
     fetchFeatures (page = 1, lastQuery = false) {
       this.$refs.table.fetchFeatures(page, lastQuery)
     },
-    runActionMethod(action, item) {
-      runAction(action, item)
+    runActionMethod(action) {
+      runAction(action)
     },
     toggleOpen(id, event) {
       this.$set(this.openRows, id, !this.openRows[id]);
@@ -277,5 +291,19 @@ export default {
     border-radius: 6px;
     margin: 2px;
   }
+}
+
+.svg-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  color: currentColor; /* hereda el color del botón */
+}
+
+.svg-icon svg {
+  width: 100% !important;
+  height: 100% !important;
+  fill: currentColor;
 }
 </style>

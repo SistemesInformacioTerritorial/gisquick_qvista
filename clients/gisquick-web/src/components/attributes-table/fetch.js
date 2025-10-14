@@ -93,6 +93,30 @@ export default {
       })
     },
     _setFeatures (data) {}, // to override
+    findLayerInStore(store, clickedLayer) {
+      const layers = store.state.project?.config?.layers || []
+
+      function recursiveSearch(layerList) {
+        for (const layer of layerList) {
+          if (layer.source) {
+            const sameSource =
+              layer.source.layername === clickedLayer.source?.layername &&
+              layer.source.file === clickedLayer.source?.file
+
+            if (sameSource) return layer
+            if (layer.name === clickedLayer.name) return layer
+          }
+
+          if (Array.isArray(layer.layers)) {
+            const found = recursiveSearch(layer.layers)
+            if (found) return found
+          }
+        }
+        return null
+      }
+
+      return recursiveSearch(layers)
+    },
 
     fetchFeatures: debounce(async function (page = 1, lastQuery = false) {
     // async fetchFeatures (page = 1, lastQuery = false) {
@@ -156,6 +180,69 @@ export default {
         sortBy: { ...this.sortBy },
         queryParams
       }
+
+      const currentStoredLayer = this.findLayerInStore(this.$store, this.layer)
+
+      // ! Tenim això per si estem a localhost que sempre posi dades mock, dins del bloc if podem afegir o treure accions per testing!
+      if (window.location.href.includes("localhost")) {
+        currentStoredLayer.actions = [
+          {
+            "id": "{8276dfb0-e92b-4df8-b1af-2727ab29fe2b}",
+            "name": "Obrir imatge URL",
+            "action_type": "5",
+            "action_text": "[%URL_IMATGE%]",
+            "short_title": "obrir_url",
+            "layer_id": "cens_locals_web_15753b44_dfdf_4ad0_8ee2_77f8e7098333"
+          },
+          {
+            "id": "{4bb7544c-1787-4847-b010-9975b9c8cf3ec}",
+            "name": "Obrir imatge FILE",
+            "action_type": "7",
+            "action_text": "[%PATH_IMATGE%]",
+            "short_title": "Imatge_FILE",
+            "layer_id": "cens_locals_web_15753b44_dfdf_4ad0_8ee2_77f8e7098333"
+          },
+          {
+            "id": "{4bb7544c-1787-4847-b010-9975b9c8cf3e}",
+            "name": "Obrir imatge FILE",
+            "action_type": "7",
+            "action_text": "https://www.youtube.com/",
+            "short_title": "Imatge_FILE",
+            "layer_id": "cens_locals_web_15753b44_dfdf_4ad0_8ee2_77f8e7098333"
+          },
+          {
+            "id": "{4bb7544c-1787-4847-b010-9975b9c8cf3ee}",
+            "name": "Obrir imatge FILE",
+            "action_type": "5",
+            "action_text": "[%PATH_IMATGE%]",
+            "short_title": "Imatge_FILE",
+            "layer_id": "cens_locals_web_15753b44_dfdf_4ad0_8ee2_77f8e7098333"
+          }
+        ]
+
+        features.forEach(feature => {
+          feature.values_.URL_IMATGE = 'google.com'
+          feature.values_.PATH_IMATGE = 'wikipedia.com'
+        })
+      }
+
+      features.forEach(feature => {
+        feature.values_.actions = []
+        currentStoredLayer.actions?.forEach(action => {
+          const valueAction = action.action_text
+          const match = valueAction.match(/^\[\%(.*?)\%\]$/)
+
+          let actionName
+          if (match) {
+            const variableName = match[1]
+            actionName = feature.values_[variableName]
+          } else {
+            actionName = valueAction
+          }
+
+          feature.values_.actions.push({ ...action, filtered_action: actionName})
+        })
+      })
       this._setFeatures({
         features,
         pagination,
