@@ -65,17 +65,22 @@
           <div class="tools-menu f-col f-justify-start"
             v-if="item?.actions?.length > 3"
           >
-            <v-btn class="icon flat" @click="toggleOpen(item.id, $event)">
-              <transition name="menu">
-                <v-icon v-if="isOpen(item.id)" key="x" name="x" />
-                <v-icon v-else name="menu" />
-              </transition>
+            <v-btn class="icon flat" @click="toggleOpen(item._id, $event)">
+              <transition-group name="menu">
+                <v-icon v-if="isOpen(item._id)" :key="item._id + '_closeTooltip'" name="x" />
+                <custom-icon
+                  v-if="!isOpen(item._id)"
+                  name="add"
+                  class="svg-icon"
+                  :key="item._id + '_openTooltip'"
+                />
+              </transition-group>
             </v-btn>
 
             <portal to="body-portal">
               <transition name="menu-items">
-                <div class="floating-list" v-if="isOpen(item.id)"
-                  :style="menuPosition[item.id]"
+                <div class="floating-list" v-if="isOpen(item._id)"
+                  :style="menuPosition[item._id]"
                 >
                   <v-btn
                     v-for="collapsedAction in item.actions"
@@ -149,6 +154,7 @@ import { runAction } from '@/ui/utils/extraActions'
 import { eventCoord, DragHandler } from '@/events'
 import ToolMixin from './tool.js'
 import CustomIcon from '@/components/CustomIcon.vue'
+import { getIconName } from '@/icons-manager'
 
 export default {
   name: 'attribute-table-tool',
@@ -178,11 +184,7 @@ export default {
   },
   methods: {
     getActionIcon (type) {
-      const iconMap = {
-        7: 'folder-image',
-        5: 'web',
-      }
-      return iconMap[type] || 'fallback'
+      return getIconName(type)
     },
     updateSelection (id) {
       this.selected = { layer: this.layer.name, id }

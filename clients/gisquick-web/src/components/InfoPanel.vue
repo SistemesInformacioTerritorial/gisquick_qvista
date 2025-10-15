@@ -145,6 +145,7 @@ import { externalComponent } from '@/components-loader'
 import { ShallowArray, ShallowObj } from '@/utils'
 import { runAction } from '@/ui/utils/extraActions'
 import CustomIcon from '@/components/CustomIcon.vue'
+import { getIconName } from '@/icons-manager'
 
 export default {
   name: 'info-panel',
@@ -227,13 +228,7 @@ export default {
   },
   methods: {
     getActionIcon (type) {
-      const iconMap = {
-        7: 'folder-image',
-        5: 'web',
-      }
-
-      console.log(type, 'tipo')
-      return iconMap[type] || 'fallback'
+      return getIconName(type)
     },
     runActionMethod(action) {
       runAction(action)
