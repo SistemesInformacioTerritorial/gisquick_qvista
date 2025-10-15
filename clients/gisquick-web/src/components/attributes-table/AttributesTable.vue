@@ -196,6 +196,10 @@ export default {
       runAction(action)
     },
     toggleOpen(id, event) {
+      if(this.openRows) {
+        this.openRows = {}
+        document.removeEventListener('click', this.handleClickOutside);
+      }
       this.$set(this.openRows, id, !this.openRows[id]);
       if (this.openRows[id]) {
         const rect = event?.currentTarget?.getBoundingClientRect?.() || {}
@@ -205,6 +209,21 @@ export default {
           left: rect.left + 'px',
           zIndex: 9
         })
+
+        this.$nextTick(() => {
+          document.addEventListener('click', this.handleClickOutside);
+        });
+      } else {
+        document.removeEventListener('click', this.handleClickOutside);
+      }
+    },
+    handleClickOutside(event) {
+      const clickedInsideMenu = event.target.closest('.floating-list');
+      const clickedButton = event.target.closest('.tools-menu');
+
+      if (!clickedInsideMenu && !clickedButton) {
+        this.openRows = {};
+        document.removeEventListener('click', this.handleClickOutside);
       }
     },
     isOpen(id) {
