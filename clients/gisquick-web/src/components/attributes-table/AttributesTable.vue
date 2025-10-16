@@ -59,7 +59,7 @@
               :name="getActionIcon(action.action_type)"
               class="svg-icon"
             />
-            <v-tooltip slot="tooltip">{{ action.short_title }}</v-tooltip>
+            <v-tooltip slot="tooltip">{{ action.name }}</v-tooltip>
           </v-btn>
 
           <div class="tools-menu f-col f-justify-start"
@@ -92,7 +92,7 @@
                       :name="getActionIcon(collapsedAction.action_type)"
                       class="svg-icon"
                     />
-                    <v-tooltip slot="tooltip">{{ collapsedAction.short_title }}</v-tooltip>
+                    <v-tooltip slot="tooltip">{{ collapsedAction.name }}</v-tooltip>
                   </v-btn>
                 </div>
               </transition>
@@ -197,7 +197,12 @@ export default {
     },
     toggleOpen(id, event) {
       if(this.openRows) {
-        this.openRows = {}
+        for (const key of Object.keys(this.openRows)) {
+          if (key !== id) {
+            this.$delete(this.openRows, key);
+          }
+        }
+
         document.removeEventListener('click', this.handleClickOutside);
       }
       this.$set(this.openRows, id, !this.openRows[id]);

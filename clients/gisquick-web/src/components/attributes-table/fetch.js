@@ -214,7 +214,7 @@ export default {
             "id": "{4bb7544c-1787-4847-b010-9975b9c8cf3ee}",
             "name": "Obrir document FILE",
             "action_type": "5",
-            "action_text": "[%PATH_IMATGE%]",
+            "action_text": "[%PATH_IMATGE2%]",
             "short_title": "Document",
             "layer_id": "cens_locals_web_15753b44_dfdf_4ad0_8ee2_77f8e7098333"
           }
@@ -223,6 +223,7 @@ export default {
         features.forEach(feature => {
           feature.values_.URL_IMATGE = 'google.com'
           feature.values_.PATH_IMATGE = 'wikipedia.com'
+          feature.values_.PATH_IMATGE2 = 'https://yahoo.com'
         })
 
         features[0].values_.URL_IMATGE = 'https://bing.com'

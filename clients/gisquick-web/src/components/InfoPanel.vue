@@ -129,7 +129,7 @@
           :name="getActionIcon(collapsedAction.action_type)"
           class="svg-icon"
         />
-        <v-tooltip slot="tooltip">{{ collapsedAction.short_title }}</v-tooltip>
+        <v-tooltip slot="tooltip">{{ collapsedAction.name }}</v-tooltip>
       </v-btn>
     </div>
   </div>
