@@ -39,6 +39,8 @@ HTTP.project = function (project) {
     extendProject = dev.extendProject
   }
 
+  window.project = project
+
   return new Promise((resolve, reject) => {
     const parts = project.split('/').length
     const url = parts === 3
