@@ -81,6 +81,12 @@
             v-if="expandedLayer === item"
             class="metadata f-col px-2 py-1"
           >
+            <div v-for="category in expandedLayer?.categoryList" :key="category.id">
+              <input type="checkbox"
+                v-model="category.visible"
+                @input="toggleCategoryVisibility(category.customHash, expandedLayer, $event)"
+              /> <span>{{category.title}}</span><img :src="'data:image/png;base64,' + category.icon" alt="icono categoría" />
+            </div>
             <div class="f-row-ac">
               <translate class="label">Opacity</translate>
               <v-slider
@@ -188,7 +194,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['activeTool', 'attributeTable']),
+    ...mapState(['activeTool', 'attributeTable', 'project']),
     layersInfo () {
       const layerMetadata = l => ({
         icon: geometryIcon(l),
@@ -228,6 +234,13 @@ export default {
     setLayerOpacity (layer, opacity) {
       this.$store.commit('layerOpacity', { layer, opacity })
       this.$map.overlay.getSource().setLayerOpacity(layer.name, opacity)
+    },
+    toggleCategoryVisibility (categoryHash, mainLayer, visible) {
+      console.log(categoryHash, mainLayer, visible)
+      this.$store.commit('setCategoryVisibility', { mainLayer, categoryHash, visible: visible.target.checked })
+
+      const url = new URL(this.project.config.ows_url, location.origin)
+      this.$map.overlay.getSource().setCategoryFilter({ mainLayer, categoryHash, visible: visible.target.checked, url })
     }
   }
 }

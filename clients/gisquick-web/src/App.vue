@@ -165,6 +165,7 @@ export default {
     async loadProject () {
       const data = await this.$http.project(this.projectName).catch(data => data)
       this.$store.commit('project', data)
+      await this.$store.dispatch('loadOverlayData')
       if (data.status === 200) {
         projectsHistory.push(this.user, this.projectName)
       }

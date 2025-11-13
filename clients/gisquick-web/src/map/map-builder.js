@@ -74,10 +74,44 @@ function GisquickWMSType (baseClass) {
         this.setAttributions(attributions)
       }
       this.visibleLayers = orderedLayers
+
+      const activeFilters = Object.entries(this.layerFilters || {})
+        .filter(([layer, xml]) => xml && orderedLayers.includes(layer))
+        .map(([layer, xml]) => `${layer}:${xml}`)
+
       this.updateParams({
         LAYERS: orderedLayers.join(','),
-        OPACITIES: this.getLayersOpacitiesParam(orderedLayers)
+        OPACITIES: this.getLayersOpacitiesParam(orderedLayers),
+        FILTER: activeFilters.join(';')
       })
+    }
+
+    setCategoryFilter({ mainLayer, categoryHash, visible, url }) {
+      const category = mainLayer.categoryList.find(c => c.customHash === categoryHash)
+      if (category) {
+        category.visible = visible
+      }
+
+      const hiddenCategories = mainLayer.categoryList.filter(c => !c.visible)
+
+      let filterXml = ''
+      if (hiddenCategories.length > 0) {
+        const filters = hiddenCategories.map(
+          c => `
+        <PropertyIsNotEqualTo>
+          <PropertyName>${c.propertyName}</PropertyName>
+          <Literal>${c.title}</Literal>
+        </PropertyIsNotEqualTo>
+      `
+        ).join('')
+
+        filterXml = `<Filter><And>${filters}</And></Filter>`
+      }
+
+      if (!this.layerFilters) this.layerFilters = {}
+      this.layerFilters[mainLayer.name] = filterXml
+
+      this.setVisibleLayers(this.visibleLayers)
     }
 
     getVisibleLayers () {

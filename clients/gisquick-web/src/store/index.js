@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import attributeTable from './attribute-table'
-
+import HTTP from '@/client'
 Vue.use(Vuex)
 
 function layersList (node) {
@@ -10,6 +10,56 @@ function layersList (node) {
 
 function filterGroups (node) {
   return node.layers ? [node].concat(...node.layers.map(filterGroups)) : []
+}
+
+const createUrl = (baseUrl, params = {}) => {
+  const url = new URL(baseUrl, location.origin)
+  Object.keys(params).forEach(k => url.searchParams.set(k, params[k]))
+  return url
+}
+
+const getJsonCategoriesUrl = (layername, categoriesUrl) => {
+  categoriesUrl.searchParams.set('LAYER', layername)
+  return categoriesUrl.href
+}
+
+const jsonCategoriesParams = {
+  SERVICE: 'WMS',
+  VERSION: '1.1.1',
+  REQUEST: 'GetLegendGraphic',
+  FORMAT: 'application/json',
+}
+
+const buildCategoryList = (node, layer, propertyName, result = []) => {
+  if(node.symbols?.length) {
+    node.symbols.forEach(subNode => buildCategoryList(subNode, layer, propertyName, result))
+  } else {
+    result.push({
+      ...node,
+      visible: layer.visible,
+      title:node.title,
+      propertyName: propertyName,
+      customHash: crypto.randomUUID()
+    })
+  }
+
+  return result
+}
+
+async function getPropertyNameForLayer(layerName, urlBase) {
+
+  const url = createUrl(urlBase, {
+    SERVICE: 'WMS',
+    VERSION: '1.3.0',
+    REQUEST: 'GetStyles',
+    LAYERS: layerName
+  })
+    // `http://localhost:8080/api/map/ows/nexus/cens_locals_arbre?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetStyles&LAYERS=${layerName}`
+  const xmlText = await fetch(url.href).then(r => r.text())
+  const parser = new DOMParser()
+  const xml = parser.parseFromString(xmlText, 'application/xml')
+  const prop = xml.querySelector('ogc\\:PropertyName, PropertyName')
+  return prop ? prop.textContent : null
 }
 
 export function filterLayers (items, test) {
@@ -129,7 +179,47 @@ export default new Vuex.Store({
     },
     location (state, location) {
       state.location = location
+    },
+    setLayerExternalData(state, { layer, data, propertyName }) {
+      const categoryList = data.nodes?.flatMap(node => {
+        return buildCategoryList(node, layer, propertyName)
+      })
+      if (!categoryList || !categoryList.length) return
+      Vue.set(layer, 'categoryList', categoryList)
+      Vue.set(layer, 'propertyName', propertyName)
+    },
+    setCategoryVisibility(state, { mainLayer, categoryHash, visible }) {
+      const category = mainLayer.categoryList.find(c => c.customHash === categoryHash)
+      if (category) {
+        category.visible = visible
+      }
     }
+  },
+  actions: {
+    async loadOverlayData({ state, commit }) {
+      if (!state.project) return
+      const categoriesUrl = createUrl(state.project.config.ows_url, jsonCategoriesParams)
+
+      const tree = state.project.overlays.tree
+
+      async function fetchLayerData(layer) {
+        if (layer.layers) {
+          await Promise.all(layer.layers.map(fetchLayerData))
+        } else {
+          try {
+            const response = await HTTP.get(getJsonCategoriesUrl(layer.name, categoriesUrl))
+            const propertyName = await getPropertyNameForLayer(layer.title, state.project.config.ows_url)
+            if(propertyName && layer.queryable) {
+              commit('setLayerExternalData', { layer, data: response.data, propertyName })
+            }
+          } catch (err) {
+            console.warn(`Error cargando datos de ${layer.name}`, err.message)
+          }
+        }
+      }
+
+      await Promise.all(tree.map(fetchLayerData))
+    },
   },
   getters: {
     visibleBaseLayer: state => {
