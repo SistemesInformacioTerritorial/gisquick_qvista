@@ -150,10 +150,19 @@ export default {
           "action_text": "[%PATH_IMATGE2%]",
           "short_title": "Document",
           "layer_id": "cens_locals_web_15753b44_dfdf_4ad0_8ee2_77f8e7098333"
+        },
+        {
+          "id": "{b591c507-e470-4c60-887c-880ef0fe9edf}",
+          "name": "Concatenació FILE",
+          "action_type": "5",
+          "action_text": "[% concat( 'Fotos/', \"fid\" ,'.jpg')%]",
+          "short_title": "Concat_FILE",
+          "layer_id": "cens_locals_codi_parcela_c47234d7_f85c_466a_a4aa_790797e5b66e"
         }
       ]
 
-      features.forEach(feature => {
+      features.forEach((feature, id) => {
+        feature.values_.fid = id + 1
         feature.values_.URL_IMATGE = 'google.com'
         feature.values_.PATH_IMATGE = 'wikipedia.com'
         feature.values_.PATH_IMATGE2 = 'https://yahoo.com'
@@ -166,12 +175,34 @@ export default {
         feature.values_.actions = []
         currentStoredLayer.actions?.forEach(action => {
           const valueAction = action.action_text
+          // Extrae lo que esté dentro de este patrón [%...%]
           const match = valueAction.match(/^\[\%(.*?)\%\]$/)
 
           let actionName
           if (match) {
             const variableName = match[1]
-            actionName = feature.values_[variableName]
+            const isConcat = /^\s*concat\s*\(.*\)\s*$/.test(variableName)
+
+            if (isConcat) {
+              const parts = variableName.match(/'[^']*'|"[^"]*"/g) || []
+
+              actionName = parts
+                .map(part => {
+                  // Texto estático
+                  if (part.startsWith("'")) {
+                    return part.slice(1, -1)
+                  }
+                  // Variable dinámica
+                  if (part.startsWith('"')) {
+                    const variableName = part.slice(1, -1)
+                    return feature.values_[variableName] ?? ''
+                  }
+                  return ''
+                })
+                .join('')
+            } else {
+              actionName = feature.values_[variableName]
+            }
           } else {
             actionName = valueAction
           }
