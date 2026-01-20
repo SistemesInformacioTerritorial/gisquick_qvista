@@ -4,6 +4,21 @@ import attributeTable from './attribute-table'
 import HTTP from '@/client'
 Vue.use(Vuex)
 
+const generateUUID = () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // versión 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variante RFC
+
+  const hex = [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+  return (
+    hex.slice(0, 8) + '-' +
+    hex.slice(8, 12) + '-' +
+    hex.slice(12, 16) + '-' +
+    hex.slice(16, 20) + '-' +
+    hex.slice(20)
+  );
+}
+
 function layersList (node) {
   return node.layers ? [].concat(...node.layers.map(layersList)) : [node]
 }
@@ -39,7 +54,7 @@ const buildCategoryList = (node, layer, propertyName, result = []) => {
       visible: layer.visible,
       title:node.title,
       propertyName: propertyName,
-      customHash: crypto.randomUUID()
+      customHash: generateUUID()
     })
   }
 
@@ -208,7 +223,7 @@ export default new Vuex.Store({
         } else {
           try {
             const response = await HTTP.get(getJsonCategoriesUrl(layer.name, categoriesUrl))
-            const propertyName = await getPropertyNameForLayer(layer.title, state.project.config.ows_url)
+            const propertyName = await getPropertyNameForLayer(layer.name, state.project.config.ows_url)
             if(propertyName && layer.queryable) {
               commit('setLayerExternalData', { layer, data: response.data, propertyName })
             }

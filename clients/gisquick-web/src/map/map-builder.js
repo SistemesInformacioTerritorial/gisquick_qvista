@@ -23,6 +23,85 @@ import omitBy from 'lodash/omitBy'
 import { wmtsSource } from './wmts'
 import { debounce } from 'lodash'
 
+const cqlLiteral = (value) => {
+  if (typeof value === 'number') return value
+  return `'${String(value).replace(/'/g, "''")}'`
+}
+
+const cqlField = (name) => {
+  return `"${name.replace(/"/g, '""')}"`
+}
+
+const buildCqlCondition = (category) => {
+  const field = cqlField(category.propertyName)
+  const title = category.title
+
+  if (isNumericRange(title)) {
+    const { min, max } = parseRange(title)
+    return `${field} < ${min} OR ${field} > ${max}`
+  }
+
+  if (isLessThan(title)) {
+    const value = parseComparison(title)
+    return `${field} >= ${value}`
+  }
+
+  if (isGreaterThan(title)) {
+    const value = parseComparison(title)
+    return `${field} <= ${value}`
+  }
+
+  // caso simple (texto / código)
+  return `${field} != ${cqlLiteral(title)}`
+}
+
+const groupCqlConditions = (categories) => {
+  const conditions = []
+
+  categories.forEach(category => {
+    conditions.push(buildCqlCondition(category))
+  })
+
+  return conditions
+}
+
+// Regex rango de valores : "-123.45 - 678.90" Requiere de espacios alrededor del guion
+const RANGE_REGEX = /^\s*-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s-\s-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s*$/
+
+// Regex menor que : "< 123,451"
+const LESS_THAN_REGEX = /^\s*<\s*-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s*$/
+
+// Regex mayor que : "> 123,451"
+const GREATER_THAN_REGEX = /^\s*>\s*-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s*$/
+
+function isNumericRange(label) {
+  return RANGE_REGEX.test(label)
+}
+
+function parseNumber(value) {
+  return Number(value.replace(/,/g, ''))
+}
+
+function parseRange(label) {
+  const [minRaw, maxRaw] = label.split(' - ')
+  return {
+    min: parseNumber(minRaw),
+    max: parseNumber(maxRaw)
+  }
+}
+
+function isLessThan(label) {
+  return LESS_THAN_REGEX.test(label)
+}
+
+function isGreaterThan(label) {
+  return GREATER_THAN_REGEX.test(label)
+}
+
+function parseComparison(label) {
+  const value = label.replace(/[<>]/g, '').trim()
+  return parseNumber(value)
+}
 
 const cleanParams = params => omitBy(params, v => v === undefined || v === null || v === '')
 
@@ -76,8 +155,8 @@ function GisquickWMSType (baseClass) {
       this.visibleLayers = orderedLayers
 
       const activeFilters = Object.entries(this.layerFilters || {})
-        .filter(([layer, xml]) => xml && orderedLayers.includes(layer))
-        .map(([layer, xml]) => `${layer}:${xml}`)
+        .filter(([layer, cql]) => cql && orderedLayers.includes(layer))
+        .map(([layer, cql]) => `${layer}:${cql}`)
 
       this.updateParams({
         LAYERS: orderedLayers.join(','),
@@ -88,28 +167,19 @@ function GisquickWMSType (baseClass) {
 
     setCategoryFilter({ mainLayer, categoryHash, visible, url }) {
       const category = mainLayer.categoryList.find(c => c.customHash === categoryHash)
-      if (category) {
-        category.visible = visible
-      }
+      if (category) category.visible = visible
 
       const hiddenCategories = mainLayer.categoryList.filter(c => !c.visible)
 
-      let filterXml = ''
-      if (hiddenCategories.length > 0) {
-        const filters = hiddenCategories.map(
-          c => `
-        <PropertyIsNotEqualTo>
-          <PropertyName>${c.propertyName}</PropertyName>
-          <Literal>${c.title}</Literal>
-        </PropertyIsNotEqualTo>
-      `
-        ).join('')
+      let cql = ''
 
-        filterXml = `<Filter><And>${filters}</And></Filter>`
+      if (hiddenCategories.length > 0) {
+        const conditions = groupCqlConditions(hiddenCategories)
+        cql = conditions.join(' AND ')
       }
 
       if (!this.layerFilters) this.layerFilters = {}
-      this.layerFilters[mainLayer.name] = filterXml
+      this.layerFilters[mainLayer.name] = cql
 
       this.setVisibleLayers(this.visibleLayers)
     }
