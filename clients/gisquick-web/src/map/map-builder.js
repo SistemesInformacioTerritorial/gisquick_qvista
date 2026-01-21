@@ -24,12 +24,33 @@ import { wmtsSource } from './wmts'
 import { debounce } from 'lodash'
 
 const cqlLiteral = (value) => {
-  if (typeof value === 'number') return value
-  return `'${String(value).replace(/'/g, "''")}'`
+  if (typeof value === 'number') return value;
+
+  const str = String(value);
+
+  // Si contiene comillas dobles, envuelve en simples
+  if (str.includes('"')) return `'${str}'`;
+
+  // Si contiene comillas simples, envuelve en dobles
+  if (str.includes("'")) return `"${str}"`;
+
+  // Caso normal: envuelve en simples
+  return `'${str}'`;
 }
 
 const cqlField = (name) => {
-  return `"${name.replace(/"/g, '""')}"`
+  name = name.trim();
+
+  // Si ya está entre dobles o backticks, devolvemos tal cual
+  if ((name.startsWith('"') && name.endsWith('"')) || (name.startsWith('`') && name.endsWith('`'))) {
+    return name;
+  }
+
+  // Si contiene comillas dobles internas, lo devolvemos sin envolver (asumimos que ya se ha de usar literal)
+  if (name.includes('"')) return `'${name}'`;
+
+  // Caso normal: envolvemos en dobles
+  return `"${name}"`;
 }
 
 const buildCqlCondition = (category) => {

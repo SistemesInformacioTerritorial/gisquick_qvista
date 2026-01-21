@@ -51,7 +51,7 @@ const buildCategoryList = (node, layer, propertyName, result = []) => {
   } else {
     result.push({
       ...node,
-      visible: layer.visible,
+      visible: true, //true para que cuando la capa esté desactivada y activemos visiblemente aparezcan todos, layer.visible
       title:node.title,
       propertyName: propertyName,
       customHash: generateUUID()
