@@ -45,36 +45,136 @@ const jsonCategoriesParams = {
   FORMAT: 'application/json',
 }
 
-const buildCategoryList = (node, layer, propertyName, result = []) => {
-  if(node.symbols?.length) {
-    node.symbols.forEach(subNode => buildCategoryList(subNode, layer, propertyName, result))
-  } else {
-    result.push({
-      ...node,
-      visible: true, //true para que cuando la capa esté desactivada y activemos visiblemente aparezcan todos, layer.visible
-      title:node.title,
-      propertyName: propertyName,
-      customHash: generateUUID()
-    })
-  }
+function getPropAndVal(node) {
+  const prop =
+    node.getElementsByTagName("ogc:PropertyName")[0]?.textContent ||
+    node.getElementsByTagName("PropertyName")[0]?.textContent;
 
-  return result
+  const val =
+    node.getElementsByTagName("ogc:Literal")[0]?.textContent ||
+    node.getElementsByTagName("Literal")[0]?.textContent;
+
+  return {
+    prop: `"${prop}"`,
+    val: `'${val}'`
+  };
 }
 
-async function getPropertyNameForLayer(layerName, urlBase) {
+function parseNode(node) {
+
+  switch (node.localName) {
+
+    case "Or": {
+      const children = [...node.children]
+        .map(parseNode)
+        .filter(Boolean)
+        .map(c => ` ( ${c} ) `);
+
+      return children.join(" OR ");
+    }
+
+    case "And": {
+      const children = [...node.children]
+        .map(parseNode)
+        .filter(Boolean)
+        .map(c => ` ( ${c} ) `);
+
+      return children.join(" AND ");
+    }
+
+    case "PropertyIsEqualTo": {
+      const { prop, val } = getPropAndVal(node);
+      return `${prop} = ${val}`;
+    }
+
+    case "PropertyIsGreaterThan": {
+      const { prop, val } = getPropAndVal(node);
+      return `${prop} > ${val}`;
+    }
+
+    case "PropertyIsGreaterThanOrEqualTo": {
+      const { prop, val } = getPropAndVal(node);
+      return `${prop} >= ${val}`;
+    }
+
+    case "PropertyIsLessThan": {
+      const { prop, val } = getPropAndVal(node);
+      return `${prop} < ${val}`;
+    }
+
+    case "PropertyIsLessThanOrEqualTo": {
+      const { prop, val } = getPropAndVal(node);
+      return `${prop} <= ${val}`;
+    }
+
+    default:
+      console.warn("Nodo OGC no soportado:", node.localName);
+      return "";
+  }
+}
+
+async function getCategoryTreeValues(layer, urlBase, jsonData) {
 
   const url = createUrl(urlBase, {
     SERVICE: 'WMS',
     VERSION: '1.3.0',
     REQUEST: 'GetStyles',
-    LAYERS: layerName
+    LAYERS: layer.name
   })
-    // `http://localhost:8080/api/map/ows/nexus/cens_locals_arbre?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetStyles&LAYERS=${layerName}`
+    // `http://localhost:8080/api/map/ows/nexus/cens_locals_arbre?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetStyles&LAYERS=${layer.name}`
   const xmlText = await fetch(url.href).then(r => r.text())
   const parser = new DOMParser()
   const xml = parser.parseFromString(xmlText, 'application/xml')
   const prop = xml.querySelector('ogc\\:PropertyName, PropertyName')
-  return prop ? prop.textContent : null
+
+  const categoryList = [];
+  if (prop?.textContent && layer.queryable) {
+    const rules = xml.querySelectorAll('se\\:Rule, Rule');
+
+    const availableSymbols = [...(jsonData?.nodes?.[0]?.symbols || [])];
+
+    rules.forEach(rule => {
+
+      const hasVisualSymbolizer = rule.querySelector(
+        'se\\:PointSymbolizer, se\\:PolygonSymbolizer, se\\:LineSymbolizer, PointSymbolizer, PolygonSymbolizer, LineSymbolizer'
+      );
+
+      if (!hasVisualSymbolizer) return;
+
+      const titleNode = rule.querySelector('se\\:Name, Name');
+      const filterNode = rule.querySelector('ogc\\:Filter, Filter');
+
+      if (!filterNode) return;
+
+      const rootFilter = filterNode.firstElementChild;
+      const filterString = ` ( ${parseNode(rootFilter)} ) `;
+      const title = titleNode?.textContent;
+
+      const symbolIndex = availableSymbols.findIndex(
+        s => s.title === title
+      );
+
+      if (symbolIndex !== -1 && title) {
+
+        const icon = availableSymbols[symbolIndex].icon;
+        availableSymbols.splice(symbolIndex, 1);
+
+        categoryList.push({
+          title,
+          icon,
+          visible: true,
+          propertyName: prop?.textContent || null,
+          filterString,
+          customHash: generateUUID()
+        });
+      }
+    });
+  }
+
+  return {
+    categoryList,
+    propertyName: prop?.textContent
+  }
 }
 
 export function filterLayers (items, test) {
@@ -196,11 +296,7 @@ export default new Vuex.Store({
       state.location = location
     },
     setLayerExternalData(state, { layer, data, propertyName }) {
-      const categoryList = data.nodes?.flatMap(node => {
-        return buildCategoryList(node, layer, propertyName)
-      })
-      if (!categoryList || !categoryList.length) return
-      Vue.set(layer, 'categoryList', categoryList)
+      Vue.set(layer, 'categoryList', data)
       Vue.set(layer, 'propertyName', propertyName)
     },
     setCategoryVisibility(state, { mainLayer, categoryHash, visible }) {
@@ -223,10 +319,8 @@ export default new Vuex.Store({
         } else {
           try {
             const response = await HTTP.get(getJsonCategoriesUrl(layer.name, categoriesUrl))
-            const propertyName = await getPropertyNameForLayer(layer.name, state.project.config.ows_url)
-            if(propertyName && layer.queryable) {
-              commit('setLayerExternalData', { layer, data: response.data, propertyName })
-            }
+            const categoryTreeValues = await getCategoryTreeValues(layer, state.project.config.ows_url, response.data)
+            commit('setLayerExternalData', { layer, data: categoryTreeValues.categoryList, propertyName: categoryTreeValues.propertyName })
           } catch (err) {
             console.warn(`Error cargando datos de ${layer.name}`, err.message)
           }

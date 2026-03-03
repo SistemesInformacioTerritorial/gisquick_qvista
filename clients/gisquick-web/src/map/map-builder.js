@@ -23,105 +23,26 @@ import omitBy from 'lodash/omitBy'
 import { wmtsSource } from './wmts'
 import { debounce } from 'lodash'
 
-const cqlLiteral = (value) => {
-  if (typeof value === 'number') return value;
+const buildPositiveFilter = (categories) => {
 
-  const str = String(value);
+  const filters = categories
+    .map(c => c.filterString)
+    .filter(Boolean)
 
-  // Si contiene comillas dobles, envuelve en simples
-  if (str.includes('"')) return `'${str}'`;
+  if (!filters.length) return ''
 
-  // Si contiene comillas simples, envuelve en dobles
-  if (str.includes("'")) return `"${str}"`;
-
-  // Caso normal: envuelve en simples
-  return `'${str}'`;
-}
-
-const cqlField = (name) => {
-  name = name.trim();
-
-  // Si ya está entre dobles o backticks, devolvemos tal cual
-  if ((name.startsWith('"') && name.endsWith('"')) || (name.startsWith('`') && name.endsWith('`'))) {
-    return name;
+  if (filters.length === 1) {
+    return filters[0]
   }
 
-  // Si contiene comillas dobles internas, lo devolvemos sin envolver (asumimos que ya se ha de usar literal)
-  if (name.includes('"')) return `'${name}'`;
-
-  // Caso normal: envolvemos en dobles
-  return `"${name}"`;
+  return `${filters.join(' OR ')}`
 }
 
-const buildCqlCondition = (category) => {
-  const field = cqlField(category.propertyName)
-  const title = category.title
+const buildAlwaysFalseFilter = (layer) => {
 
-  if (isNumericRange(title)) {
-    const { min, max } = parseRange(title)
-    return `${field} < ${min} OR ${field} > ${max}`
-  }
+  const field = layer.propertyName || 'id'
 
-  if (isLessThan(title)) {
-    const value = parseComparison(title)
-    return `${field} >= ${value}`
-  }
-
-  if (isGreaterThan(title)) {
-    const value = parseComparison(title)
-    return `${field} <= ${value}`
-  }
-
-  // caso simple (texto / código)
-  return `${field} != ${cqlLiteral(title)}`
-}
-
-const groupCqlConditions = (categories) => {
-  const conditions = []
-
-  categories.forEach(category => {
-    conditions.push(buildCqlCondition(category))
-  })
-
-  return conditions
-}
-
-// Regex rango de valores : "-123.45 - 678.90" Requiere de espacios alrededor del guion
-const RANGE_REGEX = /^\s*-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s-\s-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s*$/
-
-// Regex menor que : "< 123,451"
-const LESS_THAN_REGEX = /^\s*<\s*-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s*$/
-
-// Regex mayor que : "> 123,451"
-const GREATER_THAN_REGEX = /^\s*>\s*-?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s*$/
-
-function isNumericRange(label) {
-  return RANGE_REGEX.test(label)
-}
-
-function parseNumber(value) {
-  return Number(value.replace(/,/g, ''))
-}
-
-function parseRange(label) {
-  const [minRaw, maxRaw] = label.split(' - ')
-  return {
-    min: parseNumber(minRaw),
-    max: parseNumber(maxRaw)
-  }
-}
-
-function isLessThan(label) {
-  return LESS_THAN_REGEX.test(label)
-}
-
-function isGreaterThan(label) {
-  return GREATER_THAN_REGEX.test(label)
-}
-
-function parseComparison(label) {
-  const value = label.replace(/[<>]/g, '').trim()
-  return parseNumber(value)
+  return `"${field}" IS NULL AND "${field}" IS NOT NULL`
 }
 
 const cleanParams = params => omitBy(params, v => v === undefined || v === null || v === '')
@@ -190,13 +111,14 @@ function GisquickWMSType (baseClass) {
       const category = mainLayer.categoryList.find(c => c.customHash === categoryHash)
       if (category) category.visible = visible
 
-      const hiddenCategories = mainLayer.categoryList.filter(c => !c.visible)
+      const visibleCategories = mainLayer.categoryList.filter(c => c.visible)
 
       let cql = ''
 
-      if (hiddenCategories.length > 0) {
-        const conditions = groupCqlConditions(hiddenCategories)
-        cql = conditions.join(' AND ')
+      if (visibleCategories.length === 0) {
+        cql = buildAlwaysFalseFilter(mainLayer)
+      } else if (visibleCategories.length < mainLayer.categoryList.length) {
+        cql = buildPositiveFilter(visibleCategories)
       }
 
       if (!this.layerFilters) this.layerFilters = {}
