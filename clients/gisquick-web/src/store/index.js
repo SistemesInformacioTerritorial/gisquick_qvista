@@ -115,7 +115,7 @@ function parseNode(node) {
 }
 
 async function loadQgsXml(projectName, title) {
-  // "http://localhost:8081/api/project/download/nexus/PPM_CatRegles_prova7/PPM_CatRegles_prova7.qgs"
+  // "http://localhost:8081/api/project/download/nexus/PPM_CategVariableContinua/PPM_CategVariableContinua_gpkg.qgs"
   // `http://localhost:8080/api/map/ows/nexus/CensLocals_accions?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetStyles&LAYERS=cens_locals_cens_locals_web`
   const baseUrl = `${window.location.origin}/api/project/download/${projectName}/`
 
@@ -151,10 +151,10 @@ async function loadQgsXml(projectName, title) {
 
 async function getCategoryTreeValues(layer, qgsXml, jsonData) {
 
-  const categoryList = [];
+  const ruleTree = [];
 
   if (!layer.queryable) {
-    return { categoryList, propertyName: null }
+    return { ruleTree, propertyName: null }
   }
 
   // buscar layer en el qgs
@@ -165,12 +165,12 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
   )
 
   if (!layerNode) {
-    return { categoryList, propertyName: null }
+    return { ruleTree, propertyName: null }
   }
 
   const renderer = layerNode.querySelector('renderer-v2')
   if (!renderer) {
-    return { categoryList, propertyName: null }
+    return { ruleTree, propertyName: null }
   }
 
   const availableSymbols = [...(jsonData?.nodes?.[0]?.symbols || [])]
@@ -179,34 +179,64 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
   //* RULE RENDERER
   if (rendererType === 'RuleRenderer') {
 
-    const rules = renderer.querySelectorAll('rule')
+    const rulesRoot = renderer.querySelector('rules')
+    if (!rulesRoot) {
+      return { ruleTree: [], propertyName: null }
+    }
 
-    rules.forEach(rule => {
-      const label = rule.getAttribute('label')
-      const filter = rule.getAttribute('filter')
+    function buildRuleNode(ruleNode) {
 
-      if (!label || !filter) return
+      const label = ruleNode.getAttribute('label')
+      const filter = ruleNode.getAttribute('filter')
+      const symbolAttr = ruleNode.getAttribute('symbol')
 
       const decodedFilter = filter
-        .replace(/&quot;/g, '"')
-        .replace(/&apos;/g, "'")
+        ? filter.replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+        : null
 
-      const symbolIndex = availableSymbols.findIndex(
-        s => s.title === label
+      let icon = null
+
+      if (symbolAttr !== null) {
+        const symbolIndex = availableSymbols.findIndex(
+          s => s.title === label
+        )
+
+        if (symbolIndex !== -1) {
+          icon = availableSymbols[symbolIndex].icon
+          availableSymbols.splice(symbolIndex, 1)
+        }
+      }
+
+      const node = {
+        id: generateUUID(),
+        title: label || 'Sin etiqueta',
+        icon,
+        visible: true,
+        filterString: decodedFilter ? ` ( ${decodedFilter} ) ` : null,
+        customHash: generateUUID(),
+        children: []
+      }
+
+      // 👇 SOLO hijos directos (no todos descendientes)
+      const directChildren = [...ruleNode.children].filter(
+        c => c.tagName === 'rule'
       )
 
-      const icon = availableSymbols[symbolIndex].icon
-      availableSymbols.splice(symbolIndex, 1)
+      node.children = directChildren.map(buildRuleNode)
 
-      categoryList.push({
-        title: label,
-        icon,
-        propertyName: null, // ahora puede ser múltiple
-        visible: true,
-        filterString: ` ( ${decodedFilter} ) `,
-        customHash: generateUUID()
-      })
-    })
+      return node
+    }
+
+    const rootRules = [...rulesRoot.children].filter(
+      c => c.tagName === 'rule'
+    )
+
+    const ruleTree = rootRules.map(buildRuleNode)
+
+    return {
+      ruleTree,
+      propertyName: null
+    }
   }
 
   //* GRADUATED (RANGE)
@@ -233,7 +263,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
       const icon = availableSymbols[symbolIndex].icon
       availableSymbols.splice(symbolIndex, 1)
 
-      categoryList.push({
+      ruleTree.push({
         title: label,
         icon,
         propertyName: null,
@@ -244,7 +274,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
     })
 
     return {
-      categoryList,
+      ruleTree,
       propertyName: attr
     }
   }
@@ -275,7 +305,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
       const icon = availableSymbols[symbolIndex].icon
       availableSymbols.splice(symbolIndex, 1)
 
-      categoryList.push({
+      ruleTree.push({
         title: label || value,
         icon,
         propertyName: null,
@@ -286,13 +316,13 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
     })
 
     return {
-      categoryList,
+      ruleTree,
       propertyName: attr
     }
   }
 
   return {
-    categoryList,
+    ruleTree,
     propertyName: null
   }
 }
@@ -416,14 +446,18 @@ export default new Vuex.Store({
       state.location = location
     },
     setLayerExternalData(state, { layer, data, propertyName }) {
-      Vue.set(layer, 'categoryList', data)
+      Vue.set(layer, 'ruleTree', data)
       Vue.set(layer, 'propertyName', propertyName)
     },
-    setCategoryVisibility(state, { mainLayer, categoryHash, visible }) {
-      const category = mainLayer.categoryList.find(c => c.customHash === categoryHash)
-      if (category) {
-        category.visible = visible
+    setRuleVisibility(state, { rule }) {
+      function setRecursive(node, value) {
+        node.visible = value
+        if (node.children?.length) {
+          node.children.forEach(child => setRecursive(child, value))
+        }
       }
+
+      setRecursive(rule, !rule.visible)
     }
   },
   actions: {
@@ -441,7 +475,7 @@ export default new Vuex.Store({
             const response = await HTTP.get(getJsonCategoriesUrl(layer?.name, categoriesUrl))
             const qgsXml = await loadQgsXml(window.project, state.project.config.title);
             const categoryTreeValues = await getCategoryTreeValues(layer, qgsXml,response.data)
-            commit('setLayerExternalData', { layer, data: categoryTreeValues.categoryList, propertyName: categoryTreeValues.propertyName })
+            commit('setLayerExternalData', { layer, data: categoryTreeValues.ruleTree, propertyName: categoryTreeValues.propertyName })
           } catch (err) {
             console.warn(`Error cargando datos de ${layer?.name}`, err.message)
           }

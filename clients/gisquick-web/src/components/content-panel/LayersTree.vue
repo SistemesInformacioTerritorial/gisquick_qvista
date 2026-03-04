@@ -81,12 +81,12 @@
             v-if="expandedLayer === item"
             class="metadata f-col px-2 py-1"
           >
-            <div v-for="category in expandedLayer?.categoryList" :key="category.id">
-              <input type="checkbox"
-                v-model="category.visible"
-                @input="toggleCategoryVisibility(category.customHash, expandedLayer, $event)"
-              /> <span>{{category.title}}</span><img :src="'data:image/png;base64,' + category.icon" alt="icono categoría" />
-            </div>
+            <RuleNode
+              v-for="rule in expandedLayer?.ruleTree"
+              :key="rule.id"
+              :node="rule"
+              @toggle="toggleRuleVisibility($event, expandedLayer)"
+            />
             <div class="f-row-ac">
               <translate class="label">Opacity</translate>
               <v-slider
@@ -150,6 +150,7 @@
 <script>
 import { mapState } from 'vuex'
 import { hexColor } from '@/ui/utils/colors'
+import RuleNode from '@/components/RuleNode.vue'
 
 const VectorIcons = {
   NoGeometry: 'attribute-table',
@@ -186,6 +187,9 @@ export default {
     attributeTableDisabled: Boolean,
     expanded: Object,
     layers: Object
+  },
+  components: {
+    RuleNode
   },
   data () {
     return {
@@ -235,12 +239,18 @@ export default {
       this.$store.commit('layerOpacity', { layer, opacity })
       this.$map.overlay.getSource().setLayerOpacity(layer.name, opacity)
     },
-    toggleCategoryVisibility (categoryHash, mainLayer, visible) {
-      console.log(categoryHash, mainLayer, visible)
-      this.$store.commit('setCategoryVisibility', { mainLayer, categoryHash, visible: visible.target.checked })
+    toggleRuleVisibility(rule, layer) {
+      this.$store.commit('setRuleVisibility', { rule, layer })
+
+      console.log(rule, layer);
 
       const url = new URL(this.project.config.ows_url, location.origin)
-      this.$map.overlay.getSource().setCategoryFilter({ mainLayer, categoryHash, visible: visible.target.checked, url })
+
+      this.$map.overlay.getSource().setRuleFilter({
+        mainLayer: layer,
+        ruleTree: layer.ruleTree,
+        url
+      })
     }
   }
 }

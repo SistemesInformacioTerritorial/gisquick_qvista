@@ -23,19 +23,24 @@ import omitBy from 'lodash/omitBy'
 import { wmtsSource } from './wmts'
 import { debounce } from 'lodash'
 
-const buildPositiveFilter = (categories) => {
+function collectAllFilterNodes(ruleTree) {
 
-  const filters = categories
-    .map(c => c.filterString)
-    .filter(Boolean)
+  const nodes = []
 
-  if (!filters.length) return ''
+  function traverse(node) {
 
-  if (filters.length === 1) {
-    return filters[0]
+    if (node.filterString) {
+      nodes.push(node)
+    }
+
+    if (node.children?.length) {
+      node.children.forEach(traverse)
+    }
   }
 
-  return `${filters.join(' OR ')}`
+  ruleTree.forEach(traverse)
+
+  return nodes
 }
 
 const buildAlwaysFalseFilter = (layer) => {
@@ -47,15 +52,15 @@ const buildAlwaysFalseFilter = (layer) => {
 
 const cleanParams = params => omitBy(params, v => v === undefined || v === null || v === '')
 
-function createUrl (baseUrl, params = {}) {
+function createUrl(baseUrl, params = {}) {
   const url = new URL(baseUrl, location.origin)
   Object.keys(params).forEach(k => url.searchParams.set(k, params[k]))
   return url
 }
 
-function GisquickWMSType (baseClass) {
+function GisquickWMSType(baseClass) {
   class GisquickWMS extends baseClass {
-    constructor (opts) {
+    constructor(opts) {
       super(opts)
       this.layersAttributions = opts.layersAttributions || {}
       this.layersOrder = opts.layersOrder || {}
@@ -80,13 +85,13 @@ function GisquickWMSType (baseClass) {
       }, 200)
     }
 
-    getLayersOpacitiesParam (layers) {
+    getLayersOpacitiesParam(layers) {
       const opacities = layers.map(lname => this.opacities[lname] ?? 255)
       const setOpacities = opacities.some(o => o !== 255)
       return setOpacities ? opacities.join(',') : ''
     }
 
-    setVisibleLayers (layers) {
+    setVisibleLayers(layers) {
       const orderedLayers = [].concat(layers)
       orderedLayers.sort((l2, l1) => this.layersOrder[l1] - this.layersOrder[l2])
       // update attributions
@@ -107,30 +112,31 @@ function GisquickWMSType (baseClass) {
       })
     }
 
-    setCategoryFilter({ mainLayer, categoryHash, visible, url }) {
-      const category = mainLayer.categoryList.find(c => c.customHash === categoryHash)
-      if (category) category.visible = visible
+    setRuleFilter({ mainLayer, ruleTree }) {
 
-      const visibleCategories = mainLayer.categoryList.filter(c => c.visible)
+      const allFilterNodes = collectAllFilterNodes(ruleTree)
+
+      const visibleNodes = allFilterNodes.filter(n => n.visible)
+      const hiddenNodes = allFilterNodes.filter(n => !n.visible)
 
       let cql = ''
 
-      if (visibleCategories.length === 0) {
+      if (visibleNodes.length === 0) {
+
         cql = buildAlwaysFalseFilter(mainLayer)
 
-      } else if (visibleCategories.length === mainLayer.categoryList.length) {
-        // todas activas → sin filtro
+      } else if (visibleNodes.length === allFilterNodes.length) {
+
         cql = ''
 
       } else {
 
-        const positive = visibleCategories
-          .map(c => c.filterString)
+        const positive = visibleNodes
+          .map(n => n.filterString)
           .filter(Boolean)
 
-        const negative = mainLayer.categoryList
-          .filter(c => !c.visible)
-          .map(c => `NOT ${c.filterString}`)
+        const negative = hiddenNodes
+          .map(n => `NOT ${n.filterString}`)
           .filter(Boolean)
 
         const positiveBlock = positive.length > 1
@@ -144,23 +150,17 @@ function GisquickWMSType (baseClass) {
         cql = `${positiveBlock}${negativeBlock}`
       }
 
-      // if (visibleCategories.length === 0) {
-      //   cql = buildAlwaysFalseFilter(mainLayer)
-      // } else if (visibleCategories.length < mainLayer.categoryList.length) {
-      //   cql = buildPositiveFilter(visibleCategories)
-      // }
-
       if (!this.layerFilters) this.layerFilters = {}
       this.layerFilters[mainLayer.name] = cql
 
       this.setVisibleLayers(this.visibleLayers)
     }
 
-    getVisibleLayers () {
+    getVisibleLayers() {
       return this.visibleLayers
     }
 
-    getLegendUrl (layername, view, opts) {
+    getLegendUrl(layername, view, opts) {
       this.legendUrl.searchParams.set('LAYER', layername)
       this.legendUrl.searchParams.set('SCALE', Math.round(view.getScale()))
       if (opts) {
@@ -171,12 +171,12 @@ function GisquickWMSType (baseClass) {
       return this.legendUrl.href
     }
 
-    setLayerOpacity (layername, opacity) {
+    setLayerOpacity(layername, opacity) {
       this.opacities[layername] = opacity
       this.updateOpacitiesParam()
     }
 
-    refresh () {
+    refresh() {
       // prevent caching in the browser by additional GET parameter updated on every change
       this.updateParams({ rev: this.getRevision() })
     }
@@ -188,7 +188,7 @@ export const GisquickTileWMS = GisquickWMSType(TileWMS)
 export const GisquickImageWMS = GisquickWMSType(ImageWMS)
 
 export class WebgisTileImage extends TileImage {
-  constructor (opts) {
+  constructor(opts) {
     super(opts)
     this.tilesUrl = opts.tilesUrl || ''
     this.owsUrl = opts.owsUrl || ''
@@ -200,7 +200,7 @@ export class WebgisTileImage extends TileImage {
     this.setVisibleLayers(opts.visibleLayers || [])
   }
 
-  _tileUrlFunction (tileCoord, pixelRatio, projection) {
+  _tileUrlFunction(tileCoord, pixelRatio, projection) {
     if (this.visibleLayers.length === 0) {
       return ''
     }
@@ -211,7 +211,7 @@ export class WebgisTileImage extends TileImage {
       .replace('{y}', y)
   }
 
-  setVisibleLayers (layers) {
+  setVisibleLayers(layers) {
     const orderedLayers = [].concat(layers)
     orderedLayers.sort((l2, l1) => this.layersOrder[l1] - this.layersOrder[l2])
     this.visibleLayers = orderedLayers
@@ -231,11 +231,11 @@ export class WebgisTileImage extends TileImage {
    * Returns list of visible layers (names)
    * @return {Array<String>}
    */
-  getVisibleLayers () {
+  getVisibleLayers() {
     return this.visibleLayers
   }
 
-  getLegendUrl (layername, view, opts = {}) {
+  getLegendUrl(layername, view, opts = {}) {
     var zoomLevel = this.getTileGrid().getZForResolution(view.getResolution())
 
     const baseUrl = `${this.legendUrl}${md5(layername)}/${zoomLevel}.png`
@@ -260,14 +260,14 @@ export class WebgisTileImage extends TileImage {
   }
 }
 
-function createAttribution (config) {
+function createAttribution(config) {
   const html = config.url
     ? `<a href="${config.url}" target="_blank">${config.title}</a>`
     : config.title
   return html
   // return new Attribution({ html })
 }
-export function createQgisLayer (config) {
+export function createQgisLayer(config) {
   const visibleLayers = config.overlays.filter(l => l.visible).map(l => l.name)
   const layersOrder = {}
   const attributions = {}
@@ -324,7 +324,7 @@ export function createQgisLayer (config) {
       })
     })
   } else {
-    const throttle_key = `${new Date().getTime()}-${Math.random().toString(36).substring(2,7)}`
+    const throttle_key = `${new Date().getTime()}-${Math.random().toString(36).substring(2, 7)}`
     return new ImageLayer({
       visible: true,
       extent: config.extent,
@@ -346,7 +346,7 @@ export function createQgisLayer (config) {
   }
 }
 
-export async function createBaseLayer (layerConfig, projectConfig = {}) {
+export async function createBaseLayer(layerConfig, projectConfig = {}) {
   const { source, type, provider_type } = layerConfig
   const attributions = layerConfig.attribution ? [createAttribution(layerConfig.attribution)] : null
 
@@ -424,7 +424,7 @@ export async function createBaseLayer (layerConfig, projectConfig = {}) {
     })
   } */
   // fallback to render layer by qgis server
-  const throttle_key = `${new Date().getTime()}-${Math.random().toString(36).substring(2,6)}`
+  const throttle_key = `${new Date().getTime()}-${Math.random().toString(36).substring(2, 6)}`
   return new ImageLayer({
     extent: layerConfig.extent,
     source: new GisquickImageWMS({
@@ -458,7 +458,7 @@ export async function createBaseLayer (layerConfig, projectConfig = {}) {
  * @param {String} config.project ows project name
  * @param {Object} controlOpts ol control options
  */
-export function createMap (config, controlOpts = {}) {
+export function createMap(config, controlOpts = {}) {
   const projection = getProj(config.projection)
   if (!projection) {
     throw new Error(`Invalid or unknown map projection: ${config.projection}`)
@@ -512,7 +512,7 @@ export function createMap (config, controlOpts = {}) {
   return map
 }
 
-export function registerProjections (projections) {
+export function registerProjections(projections) {
   Object.entries(projections).forEach(([code, def]) => {
     if (code && !getProj(code)) {
       proj4.defs(code, def.proj4)
