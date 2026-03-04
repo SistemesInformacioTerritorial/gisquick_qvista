@@ -117,9 +117,38 @@ function GisquickWMSType (baseClass) {
 
       if (visibleCategories.length === 0) {
         cql = buildAlwaysFalseFilter(mainLayer)
-      } else if (visibleCategories.length < mainLayer.categoryList.length) {
-        cql = buildPositiveFilter(visibleCategories)
+
+      } else if (visibleCategories.length === mainLayer.categoryList.length) {
+        // todas activas → sin filtro
+        cql = ''
+
+      } else {
+
+        const positive = visibleCategories
+          .map(c => c.filterString)
+          .filter(Boolean)
+
+        const negative = mainLayer.categoryList
+          .filter(c => !c.visible)
+          .map(c => `NOT ${c.filterString}`)
+          .filter(Boolean)
+
+        const positiveBlock = positive.length > 1
+          ? `(${positive.join(' OR ')})`
+          : positive[0]
+
+        const negativeBlock = negative.length
+          ? ` AND ${negative.join(' AND ')}`
+          : ''
+
+        cql = `${positiveBlock}${negativeBlock}`
       }
+
+      // if (visibleCategories.length === 0) {
+      //   cql = buildAlwaysFalseFilter(mainLayer)
+      // } else if (visibleCategories.length < mainLayer.categoryList.length) {
+      //   cql = buildPositiveFilter(visibleCategories)
+      // }
 
       if (!this.layerFilters) this.layerFilters = {}
       this.layerFilters[mainLayer.name] = cql

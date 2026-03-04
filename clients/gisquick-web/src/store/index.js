@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import attributeTable from './attribute-table'
 import HTTP from '@/client'
 Vue.use(Vuex)
+import JSZip from 'jszip'
 
 const generateUUID = () => {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
@@ -19,11 +20,11 @@ const generateUUID = () => {
   );
 }
 
-function layersList (node) {
+function layersList(node) {
   return node.layers ? [].concat(...node.layers.map(layersList)) : [node]
 }
 
-function filterGroups (node) {
+function filterGroups(node) {
   return node.layers ? [node].concat(...node.layers.map(filterGroups)) : []
 }
 
@@ -113,71 +114,190 @@ function parseNode(node) {
   }
 }
 
-async function getCategoryTreeValues(layer, urlBase, jsonData) {
+async function loadQgsXml(projectName, title) {
+  // "http://localhost:8081/api/project/download/nexus/PPM_CatRegles_prova7/PPM_CatRegles_prova7.qgs"
+  // `http://localhost:8080/api/map/ows/nexus/CensLocals_accions?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetStyles&LAYERS=cens_locals_cens_locals_web`
+  const baseUrl = `${window.location.origin}/api/project/download/${projectName}/`
 
-  const url = createUrl(urlBase, {
-    SERVICE: 'WMS',
-    VERSION: '1.3.0',
-    REQUEST: 'GetStyles',
-    LAYERS: layer.name
-  })
-    // `http://localhost:8080/api/map/ows/nexus/cens_locals_arbre?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetStyles&LAYERS=${layer.name}`
-  const xmlText = await fetch(url.href).then(r => r.text())
-  const parser = new DOMParser()
-  const xml = parser.parseFromString(xmlText, 'application/xml')
-  const prop = xml.querySelector('ogc\\:PropertyName, PropertyName')
+  // 1️⃣ intentar .qgs
+  try {
+    const res = await fetch(`${baseUrl}${title}.qgs`)
+    if (res.ok) {
+      const text = await res.text()
+      return new DOMParser().parseFromString(text, 'application/xml')
+    }
+  } catch (e) { }
+
+  // 2️⃣ intentar .qgz
+  const resQgz = await fetch(`${baseUrl}${title}.qgz`)
+  if (!resQgz.ok) {
+    throw new Error('No se encontró .qgs ni .qgz')
+  }
+
+  const blob = await resQgz.blob()
+  const zip = await JSZip.loadAsync(blob)
+
+  // buscar archivo .qgs dentro
+  const qgsFileName = Object.keys(zip.files).find(f => f.endsWith('.qgs'))
+
+  if (!qgsFileName) {
+    throw new Error('El .qgz no contiene archivo .qgs')
+  }
+
+  const qgsText = await zip.files[qgsFileName].async('string')
+
+  return new DOMParser().parseFromString(qgsText, 'application/xml')
+}
+
+async function getCategoryTreeValues(layer, qgsXml, jsonData) {
 
   const categoryList = [];
-  if (prop?.textContent && layer.queryable) {
-    const rules = xml.querySelectorAll('se\\:Rule, Rule');
 
-    const availableSymbols = [...(jsonData?.nodes?.[0]?.symbols || [])];
+  if (!layer.queryable) {
+    return { categoryList, propertyName: null }
+  }
+
+  // buscar layer en el qgs
+  const mapLayers = qgsXml.querySelectorAll('maplayer')
+
+  const layerNode = [...mapLayers].find(l =>
+    l.querySelector('layername')?.textContent === layer.name || l.querySelector('shortname')?.textContent === layer.name
+  )
+
+  if (!layerNode) {
+    return { categoryList, propertyName: null }
+  }
+
+  const renderer = layerNode.querySelector('renderer-v2')
+  if (!renderer) {
+    return { categoryList, propertyName: null }
+  }
+
+  const availableSymbols = [...(jsonData?.nodes?.[0]?.symbols || [])]
+  const rendererType = renderer.getAttribute('type')
+
+  //* RULE RENDERER
+  if (rendererType === 'RuleRenderer') {
+
+    const rules = renderer.querySelectorAll('rule')
 
     rules.forEach(rule => {
+      const label = rule.getAttribute('label')
+      const filter = rule.getAttribute('filter')
 
-      const hasVisualSymbolizer = rule.querySelector(
-        'se\\:PointSymbolizer, se\\:PolygonSymbolizer, se\\:LineSymbolizer, PointSymbolizer, PolygonSymbolizer, LineSymbolizer'
-      );
+      if (!label || !filter) return
 
-      if (!hasVisualSymbolizer) return;
-
-      const titleNode = rule.querySelector('se\\:Name, Name');
-      const filterNode = rule.querySelector('ogc\\:Filter, Filter');
-
-      if (!filterNode) return;
-
-      const rootFilter = filterNode.firstElementChild;
-      const filterString = ` ( ${parseNode(rootFilter)} ) `;
-      const title = titleNode?.textContent;
+      const decodedFilter = filter
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
 
       const symbolIndex = availableSymbols.findIndex(
-        s => s.title === title
-      );
+        s => s.title === label
+      )
 
-      if (symbolIndex !== -1 && title) {
+      const icon = availableSymbols[symbolIndex].icon
+      availableSymbols.splice(symbolIndex, 1)
 
-        const icon = availableSymbols[symbolIndex].icon;
-        availableSymbols.splice(symbolIndex, 1);
+      categoryList.push({
+        title: label,
+        icon,
+        propertyName: null, // ahora puede ser múltiple
+        visible: true,
+        filterString: ` ( ${decodedFilter} ) `,
+        customHash: generateUUID()
+      })
+    })
+  }
 
-        categoryList.push({
-          title,
-          icon,
-          visible: true,
-          propertyName: prop?.textContent || null,
-          filterString,
-          customHash: generateUUID()
-        });
-      }
-    });
+  //* GRADUATED (RANGE)
+  if (rendererType === 'graduatedSymbol') {
+
+    const attr = renderer.getAttribute('attr')
+    const ranges = renderer.querySelectorAll('range')
+
+    ranges.forEach(range => {
+
+      const lower = range.getAttribute('lower')
+      const upper = range.getAttribute('upper')
+      const label = range.getAttribute('label')
+
+      if (!attr || lower == null || upper == null) return
+
+      // construir filtro CQL equivalente
+      const filterString = ` ( "${attr}" >= "${lower}" AND "${attr}" <= "${upper}" ) `
+
+      const symbolIndex = availableSymbols.findIndex(
+        s => s.title === label
+      )
+
+      const icon = availableSymbols[symbolIndex].icon
+      availableSymbols.splice(symbolIndex, 1)
+
+      categoryList.push({
+        title: label,
+        icon,
+        propertyName: null,
+        visible: true,
+        filterString,
+        customHash: generateUUID()
+      })
+    })
+
+    return {
+      categoryList,
+      propertyName: attr
+    }
+  }
+
+  //* CATEGORIZED
+  if (rendererType === 'categorizedSymbol') {
+
+    const attr = renderer.getAttribute('attr')
+    const categories = renderer.querySelectorAll('category')
+
+    categories.forEach(cat => {
+
+      if (cat.getAttribute('render') === 'false') return
+
+      const value = cat.getAttribute('value')
+      const label = cat.getAttribute('label')
+
+      if (!attr || value == null) return
+
+      // Si es string → comillas
+      // const isNumeric = !isNaN(value)
+
+      const filterString = ` ( "${attr}" = "${value}" ) `
+
+      const symbolIndex = availableSymbols.findIndex(
+        s => s.title === label
+      )
+      const icon = availableSymbols[symbolIndex].icon
+      availableSymbols.splice(symbolIndex, 1)
+
+      categoryList.push({
+        title: label || value,
+        icon,
+        propertyName: null,
+        visible: true,
+        filterString,
+        customHash: generateUUID()
+      })
+    })
+
+    return {
+      categoryList,
+      propertyName: attr
+    }
   }
 
   return {
     categoryList,
-    propertyName: prop?.textContent
+    propertyName: null
   }
 }
 
-export function filterLayers (items, test) {
+export function filterLayers(items, test) {
   const list = []
   items.forEach(item => {
     if (item.layers) {
@@ -210,13 +330,13 @@ export default new Vuex.Store({
     location: null
   },
   mutations: {
-    app (state, app) {
+    app(state, app) {
       state.app = app
     },
-    user (state, user) {
+    user(state, user) {
       state.user = user
     },
-    project (state, project) {
+    project(state, project) {
       if (!project) {
         state.project = null
         return
@@ -246,7 +366,7 @@ export default new Vuex.Store({
           groups,
           tree: overlaysTree,
           list: overlaysList,
-          byName:overlaysList.reduce((t, l) => (t[l.name] = l, t), {})
+          byName: overlaysList.reduce((t, l) => (t[l.name] = l, t), {})
         }
       }
       projectData.overlays.list.filter(l => l.relations?.length).forEach(l => {
@@ -259,19 +379,19 @@ export default new Vuex.Store({
       })
       state.project = projectData
     },
-    activeTool (state, name) {
+    activeTool(state, name) {
       state.activeTool = name
     },
-    visibleBaseLayer (state, name) {
+    visibleBaseLayer(state, name) {
       state.baseLayerName = name
     },
-    groupVisibility (state, { group, visible }) {
+    groupVisibility(state, { group, visible }) {
       group.visible = visible
       if (group.virtual_layer) {
         layersList(group).forEach(l => l.visible = visible)
       }
     },
-    layerVisibility (state, { layer, visible }) {
+    layerVisibility(state, { layer, visible }) {
       const group = state.project.overlays.groups.find(g => g.layers.includes(layer))
       if (group?.mutually_exclusive) {
         const offLayers = group.layers.filter(l => l.visible && l !== layer)
@@ -279,20 +399,20 @@ export default new Vuex.Store({
       }
       layer.visible = visible
     },
-    visibleLayers (state, layersNames) {
+    visibleLayers(state, layersNames) {
       state.project.overlays.list
         .filter(l => !l.hidden) // hidden layers should be always visible
         .forEach(l => {
           l.visible = layersNames.includes(l.name)
         })
     },
-    layerOpacity (state, { layer, opacity }) {
+    layerOpacity(state, { layer, opacity }) {
       layer.opacity = opacity
     },
-    showLogin (state, value) {
+    showLogin(state, value) {
       state.showLogin = value
     },
-    location (state, location) {
+    location(state, location) {
       state.location = location
     },
     setLayerExternalData(state, { layer, data, propertyName }) {
@@ -314,18 +434,21 @@ export default new Vuex.Store({
       const tree = state.project.overlays.tree
 
       async function fetchLayerData(layer) {
-        if (layer.layers) {
+        if (layer?.layers) {
           await Promise.all(layer.layers.map(fetchLayerData))
         } else {
           try {
-            const response = await HTTP.get(getJsonCategoriesUrl(layer.name, categoriesUrl))
-            const categoryTreeValues = await getCategoryTreeValues(layer, state.project.config.ows_url, response.data)
+            const response = await HTTP.get(getJsonCategoriesUrl(layer?.name, categoriesUrl))
+            const qgsXml = await loadQgsXml(window.project, state.project.config.title);
+            const categoryTreeValues = await getCategoryTreeValues(layer, qgsXml,response.data)
             commit('setLayerExternalData', { layer, data: categoryTreeValues.categoryList, propertyName: categoryTreeValues.propertyName })
           } catch (err) {
-            console.warn(`Error cargando datos de ${layer.name}`, err.message)
+            console.warn(`Error cargando datos de ${layer?.name}`, err.message)
           }
         }
       }
+
+      // fetchLayerData()
 
       await Promise.all(tree.map(fetchLayerData))
     },
