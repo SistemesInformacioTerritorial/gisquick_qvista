@@ -23,22 +23,37 @@ import omitBy from 'lodash/omitBy'
 import { wmtsSource } from './wmts'
 import { debounce } from 'lodash'
 
-function collectAllFilterNodes(ruleTree) {
+const collectAllFilterNodes = (ruleTree) => {
 
   const nodes = []
 
-  function traverse(node) {
+  const traverse = (node, parentFullFilter = null) => {
 
-    if (node.filterString) {
-      nodes.push(node)
+    const ownFilter = node.filterString || null
+
+    const fullFilter = parentFullFilter && ownFilter
+      ? ` ( ${parentFullFilter} AND ${ownFilter} ) `
+      : parentFullFilter
+        ? parentFullFilter
+        : ownFilter
+
+    if (ownFilter) {
+      nodes.push({
+        ...node,
+        fullFilter
+      })
     }
 
     if (node.children?.length) {
-      node.children.forEach(traverse)
+      node.children.forEach(child =>
+        traverse(child, fullFilter)
+      )
     }
   }
 
-  ruleTree.forEach(traverse)
+  ruleTree.forEach(root =>
+    traverse(root, null)
+  )
 
   return nodes
 }
@@ -52,7 +67,7 @@ const buildAlwaysFalseFilter = (layer) => {
 
 const cleanParams = params => omitBy(params, v => v === undefined || v === null || v === '')
 
-function createUrl(baseUrl, params = {}) {
+const createUrl = (baseUrl, params = {}) => {
   const url = new URL(baseUrl, location.origin)
   Object.keys(params).forEach(k => url.searchParams.set(k, params[k]))
   return url
@@ -132,11 +147,11 @@ function GisquickWMSType(baseClass) {
       } else {
 
         const positive = visibleNodes
-          .map(n => n.filterString)
+          .map(n => n.fullFilter)
           .filter(Boolean)
 
         const negative = hiddenNodes
-          .map(n => `NOT ${n.filterString}`)
+          .map(n => `NOT ${n.fullFilter}`)
           .filter(Boolean)
 
         const positiveBlock = positive.length > 1

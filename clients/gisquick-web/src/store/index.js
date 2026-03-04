@@ -119,7 +119,6 @@ async function loadQgsXml(projectName, title) {
   // `http://localhost:8080/api/map/ows/nexus/CensLocals_accions?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetStyles&LAYERS=cens_locals_cens_locals_web`
   const baseUrl = `${window.location.origin}/api/project/download/${projectName}/`
 
-  // 1️⃣ intentar .qgs
   try {
     const res = await fetch(`${baseUrl}${title}.qgs`)
     if (res.ok) {
@@ -128,7 +127,6 @@ async function loadQgsXml(projectName, title) {
     }
   } catch (e) { }
 
-  // 2️⃣ intentar .qgz
   const resQgz = await fetch(`${baseUrl}${title}.qgz`)
   if (!resQgz.ok) {
     throw new Error('No se encontró .qgs ni .qgz')
@@ -137,7 +135,7 @@ async function loadQgsXml(projectName, title) {
   const blob = await resQgz.blob()
   const zip = await JSZip.loadAsync(blob)
 
-  // buscar archivo .qgs dentro
+  // buscar archivo .qgs dentro del qgz
   const qgsFileName = Object.keys(zip.files).find(f => f.endsWith('.qgs'))
 
   if (!qgsFileName) {
@@ -217,7 +215,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
         children: []
       }
 
-      // 👇 SOLO hijos directos (no todos descendientes)
+      // SOLO hijos directos (no todos descendientes)
       const directChildren = [...ruleNode.children].filter(
         c => c.tagName === 'rule'
       )
@@ -466,6 +464,8 @@ export default new Vuex.Store({
       const categoriesUrl = createUrl(state.project.config.ows_url, jsonCategoriesParams)
 
       const tree = state.project.overlays.tree
+      const projectBaseName = state.project.config.ows_project.split('/')[1];
+      const qgsXml = await loadQgsXml(window.project, projectBaseName);
 
       async function fetchLayerData(layer) {
         if (layer?.layers) {
@@ -473,7 +473,6 @@ export default new Vuex.Store({
         } else {
           try {
             const response = await HTTP.get(getJsonCategoriesUrl(layer?.name, categoriesUrl))
-            const qgsXml = await loadQgsXml(window.project, state.project.config.title);
             const categoryTreeValues = await getCategoryTreeValues(layer, qgsXml,response.data)
             commit('setLayerExternalData', { layer, data: categoryTreeValues.ruleTree, propertyName: categoryTreeValues.propertyName })
           } catch (err) {
@@ -481,8 +480,6 @@ export default new Vuex.Store({
           }
         }
       }
-
-      // fetchLayerData()
 
       await Promise.all(tree.map(fetchLayerData))
     },
