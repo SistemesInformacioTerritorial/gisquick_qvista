@@ -147,6 +147,39 @@ async function loadQgsXml(projectName, title) {
   return new DOMParser().parseFromString(qgsText, 'application/xml')
 }
 
+const getEffectiveRenderer = (layerNode) => {
+
+  const SUPPORTED_TYPES = [
+    'RuleRenderer',
+    'categorizedSymbol',
+    'graduatedSymbol'
+  ]
+
+  // Buscar TODOS los renderer-v2 dentro del layer
+  const allRenderers = [...layerNode.querySelectorAll('renderer-v2')]
+
+  if (!allRenderers.length) return null
+
+  // Buscar uno cuyo type esté soportado
+  for (const r of allRenderers) {
+    const type = r.getAttribute('type')
+
+    if (SUPPORTED_TYPES.includes(type)) {
+      return r
+    }
+
+    // Si es wrapper, comprobar si dentro hay uno soportado
+    if (type === 'pointCluster') {
+      const nested = r.querySelector('renderer-v2')
+      if (nested && SUPPORTED_TYPES.includes(nested.getAttribute('type'))) {
+        return nested
+      }
+    }
+  }
+
+  return null
+}
+
 async function getCategoryTreeValues(layer, qgsXml, jsonData) {
 
   const ruleTree = [];
@@ -166,7 +199,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
     return { ruleTree, propertyName: null }
   }
 
-  const renderer = layerNode.querySelector('renderer-v2')
+  const renderer = getEffectiveRenderer(layerNode) //layerNode.querySelector('renderer-v2')
   if (!renderer) {
     return { ruleTree, propertyName: null }
   }
