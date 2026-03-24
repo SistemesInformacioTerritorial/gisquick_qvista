@@ -2,6 +2,7 @@ import isEqual from 'lodash/isEqual'
 import debounce from 'lodash/debounce'
 import { fromExtent } from 'ol/geom/Polygon'
 
+import { applyLayerActions } from '@/formatters'
 import { layerFeaturesQuery } from '@/map/featureinfo'
 import { ShallowArray } from '@/utils'
 import FeaturesReader from './features.js'
@@ -93,30 +94,6 @@ export default {
       })
     },
     _setFeatures (data) {}, // to override
-    findLayerInStore(store, clickedLayer) {
-      const layers = store.state.project?.config?.layers || []
-
-      function recursiveSearch(layerList) {
-        for (const layer of layerList) {
-          if (layer.source) {
-            const sameSource =
-              layer.source.layername === clickedLayer.source?.layername &&
-              layer.source.file === clickedLayer.source?.file
-
-            if (sameSource) return layer
-            if (layer.name === clickedLayer.name) return layer
-          }
-
-          if (Array.isArray(layer.layers)) {
-            const found = recursiveSearch(layer.layers)
-            if (found) return found
-          }
-        }
-        return null
-      }
-
-      return recursiveSearch(layers)
-    },
     setMockData(currentStoredLayer, features) {
       currentStoredLayer.actions = [
         {
@@ -169,47 +146,6 @@ export default {
       })
 
       features[0].values_.URL_IMATGE = 'https://bing.com'
-    },
-    setFilteredActionsFeatures(currentStoredLayer, features) {
-      features.forEach(feature => {
-        feature.values_.actions = []
-        currentStoredLayer.actions?.forEach(action => {
-          const valueAction = action.action_text
-          // Extrae lo que esté dentro de este patrón [%...%]
-          const match = valueAction.match(/^\[\%(.*?)\%\]$/)
-
-          let actionName
-          if (match) {
-            const variableName = match[1]
-            const isConcat = /^\s*concat\s*\(.*\)\s*$/.test(variableName)
-
-            if (isConcat) {
-              const parts = variableName.match(/'[^']*'|"[^"]*"/g) || []
-
-              actionName = parts
-                .map(part => {
-                  // Texto estático
-                  if (part.startsWith("'")) {
-                    return part.slice(1, -1)
-                  }
-                  // Variable dinámica
-                  if (part.startsWith('"')) {
-                    const variableName = part.slice(1, -1)
-                    return feature.values_[variableName] ?? ''
-                  }
-                  return ''
-                })
-                .join('')
-            } else {
-              actionName = feature.values_[variableName]
-            }
-          } else {
-            actionName = valueAction
-          }
-
-          feature.values_.actions.push({ ...action, filtered_action: actionName })
-        })
-      })
     },
     fetchFeatures: debounce(async function (page = 1, lastQuery = false) {
     // async fetchFeatures (page = 1, lastQuery = false) {
@@ -274,15 +210,10 @@ export default {
         queryParams
       }
 
-      const currentStoredLayer = this.findLayerInStore(this.$store, this.layer)
-
       // ! Tenim això per si estem a localhost que sempre posi dades mock, dins del bloc if podem afegir o treure accions per testing!
-      if (currentStoredLayer) {
-        if (window.location.href.includes("localhost")) {
-          this.setMockData(currentStoredLayer, features)
-        }
-
-        this.setFilteredActionsFeatures(currentStoredLayer, features)
+      if (this.layer && globalThis.location?.href.includes('localhost')) {
+        this.setMockData(this.layer, features)
+        applyLayerActions(this.layer, features)
       }
       this._setFeatures({
         features,
