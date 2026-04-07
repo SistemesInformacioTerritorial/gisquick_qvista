@@ -76,7 +76,26 @@ const createUrl = (baseUrl, params = {}) => {
 function GisquickWMSType(baseClass) {
   class GisquickWMS extends baseClass {
     constructor(opts) {
-      super(opts)
+      // super(opts)
+      super({
+        ...opts,
+
+        imageLoadFunction: (image, src) => {
+          const url = new URL(src, window.location.origin)
+          fetch(url.origin + url.pathname, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: url.searchParams.toString()
+          })
+            .then(res => res.blob())
+            .then(blob => {
+              image.getImage().src = URL.createObjectURL(blob)
+            })
+        }
+      })
+
       this.layersAttributions = opts.layersAttributions || {}
       this.layersOrder = opts.layersOrder || {}
       this.opacities = opts.opacities ?? {}
