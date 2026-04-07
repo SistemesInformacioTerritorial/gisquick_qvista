@@ -58,11 +58,16 @@ const collectAllFilterNodes = (ruleTree) => {
   return nodes
 }
 
-const buildAlwaysFalseFilter = (layer) => {
+const buildAlwaysFalseFilter = (parentFilterNodes) => {
+  const negative = parentFilterNodes
+    .map(n => `NOT ${n.fullFilter}`)
+    .filter(Boolean)
 
-  const field = layer.propertyName || 'id'
+  const negativeBlock = negative.length
+    ? `${negative.join(' AND ')}`
+    : ''
 
-  return `"${field}" IS NULL AND "${field}" IS NOT NULL`
+  return `${negativeBlock}`
 }
 
 const cleanParams = params => omitBy(params, v => v === undefined || v === null || v === '')
@@ -157,7 +162,9 @@ function GisquickWMSType(baseClass) {
 
       if (visibleNodes.length === 0) {
 
-        cql = buildAlwaysFalseFilter(mainLayer)
+        const parentFilterNodes = allFilterNodes.filter(filter => filter.isParentNode)
+
+        cql = buildAlwaysFalseFilter(parentFilterNodes)
 
       } else if (visibleNodes.length === allFilterNodes.length) {
 

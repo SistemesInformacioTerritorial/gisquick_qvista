@@ -61,59 +61,6 @@ function getPropAndVal(node) {
   };
 }
 
-function parseNode(node) {
-
-  switch (node.localName) {
-
-    case "Or": {
-      const children = [...node.children]
-        .map(parseNode)
-        .filter(Boolean)
-        .map(c => ` ( ${c} ) `);
-
-      return children.join(" OR ");
-    }
-
-    case "And": {
-      const children = [...node.children]
-        .map(parseNode)
-        .filter(Boolean)
-        .map(c => ` ( ${c} ) `);
-
-      return children.join(" AND ");
-    }
-
-    case "PropertyIsEqualTo": {
-      const { prop, val } = getPropAndVal(node);
-      return `${prop} = ${val}`;
-    }
-
-    case "PropertyIsGreaterThan": {
-      const { prop, val } = getPropAndVal(node);
-      return `${prop} > ${val}`;
-    }
-
-    case "PropertyIsGreaterThanOrEqualTo": {
-      const { prop, val } = getPropAndVal(node);
-      return `${prop} >= ${val}`;
-    }
-
-    case "PropertyIsLessThan": {
-      const { prop, val } = getPropAndVal(node);
-      return `${prop} < ${val}`;
-    }
-
-    case "PropertyIsLessThanOrEqualTo": {
-      const { prop, val } = getPropAndVal(node);
-      return `${prop} <= ${val}`;
-    }
-
-    default:
-      console.warn("Nodo OGC no soportado:", node.localName);
-      return "";
-  }
-}
-
 async function loadQgsXml(projectName, title) {
   // "http://localhost:8081/api/project/download/nexus/PPM_CategVariableContinua/PPM_CategVariableContinua_gpkg.qgs"
   // `http://localhost:8080/api/map/ows/nexus/CensLocals_accions?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetStyles&LAYERS=cens_locals_cens_locals_web`
@@ -215,7 +162,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
       return { ruleTree: [], propertyName: null }
     }
 
-    function buildRuleNode(ruleNode) {
+    function buildRuleNode(ruleNode, isParent = false) {
 
       const label = ruleNode.getAttribute('label')
       const filter = ruleNode.getAttribute('filter')
@@ -243,6 +190,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
         title: label || 'Sin etiqueta',
         icon,
         visible: true,
+        isParentNode: isParent,
         filterString: decodedFilter ? ` ( ${decodedFilter} ) ` : null,
         customHash: generateUUID(),
         children: []
@@ -253,7 +201,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
         c => c.tagName === 'rule'
       )
 
-      node.children = directChildren.map(buildRuleNode)
+      node.children = directChildren.map(child => buildRuleNode(child, false))
 
       return node
     }
@@ -262,7 +210,7 @@ async function getCategoryTreeValues(layer, qgsXml, jsonData) {
       c => c.tagName === 'rule'
     )
 
-    const ruleTree = rootRules.map(buildRuleNode)
+    const ruleTree = rootRules.map(child => buildRuleNode(child, true))
 
     return {
       ruleTree,
