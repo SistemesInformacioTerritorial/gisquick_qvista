@@ -515,6 +515,7 @@ export function createMap(config, controlOpts = {}) {
       projection: projection,
       center: getCenter(config.extent),
       zoom: 0,
+      rotation: config.rotation || 0,
       resolutions: config.resolutions,
       constrainResolution: true,
       extent: projection.getExtent() || config.extent,

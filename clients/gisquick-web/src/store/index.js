@@ -20,6 +20,12 @@ const generateUUID = () => {
   );
 }
 
+function getRotationFromQgs(xml) {
+  const rotationNode = xml.querySelector('mapcanvas > rotation')
+  const rotationNode2 = xml.querySelector('ProjectViewSettings').getAttribute('rotation')
+  return rotationNode ? parseFloat(rotationNode.textContent) : parseFloat(rotationNode2)
+}
+
 function layersList(node) {
   return node.layers ? [].concat(...node.layers.map(layersList)) : [node]
 }
@@ -336,9 +342,13 @@ export default new Vuex.Store({
     activeTool: null,
     showLogin: false,
     baseLayerName: null,
-    location: null
+    location: null,
+    rotation: 0
   },
   mutations: {
+    setRotation(state, rotation) {
+      state.rotation = rotation
+    },
     app(state, app) {
       state.app = app
     },
@@ -447,6 +457,8 @@ export default new Vuex.Store({
       const tree = state.project.overlays.tree
       const projectBaseName = state.project.config.ows_project.split('/')[1];
       const qgsXml = await loadQgsXml(window.project, projectBaseName);
+      const rotation = getRotationFromQgs(qgsXml) || 0
+      commit('setRotation', rotation)
 
       async function fetchLayerData(layer) {
         if (layer?.layers) {

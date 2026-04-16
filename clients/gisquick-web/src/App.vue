@@ -2,7 +2,7 @@
   <div id="app" class="app f-col">
     <MapNameBar :mapName="title" v-if="projectStatus === 200"  />
     <intro-page v-if="!projectName"/>
-    <map-app v-if="projectStatus === 200" :key="projectKey"/>
+    <map-app v-if="projectStatus === 200 && projectReady" :key="projectKey"/>
     <login-dialog
       :value="showLogin"
       :login-required="projectStatus !== 200"
@@ -95,6 +95,7 @@ export default {
       projectKey: 0,
       showInstallPrompt: false,
       title: '',
+      projectReady: false
     }
   },
   computed: {
@@ -166,6 +167,7 @@ export default {
       const data = await this.$http.project(this.projectName).catch(data => data)
       this.$store.commit('project', data)
       await this.$store.dispatch('loadOverlayData')
+      this.projectReady = true
       if (data.status === 200) {
         projectsHistory.push(this.user, this.projectName)
       }

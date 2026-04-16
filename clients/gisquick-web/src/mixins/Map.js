@@ -38,7 +38,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['project', 'activeTool']),
+    ...mapState(['project', 'activeTool', 'rotation']),
     ...mapGetters(['visibleBaseLayer', 'visibleLayers']),
     mapLoading () {
       const { baseLayer, overlays, other } = this.status
@@ -76,7 +76,8 @@ export default {
       owsUrl: config.ows_url,
       legendUrl: config.legend_url,
       mapcacheUrl: config.mapcache_url,
-      mapTiling: config.map_tiling
+      mapTiling: config.map_tiling,
+      rotation: this.rotation
     }
     const map = createMap(mapConfig, { zoom: false, attribution: false, rotate: false })
     Vue.prototype.$map = map
