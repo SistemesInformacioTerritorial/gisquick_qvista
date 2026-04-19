@@ -139,7 +139,7 @@ export default {
       ]
 
       features.forEach((feature, id) => {
-        feature.values_.fid = id + 1
+        // feature.values_.fid = id + 1
         feature.values_.URL_IMATGE = 'google.com'
         feature.values_.PATH_IMATGE = 'wikipedia.com'
         feature.values_.PATH_IMATGE2 = 'https://yahoo.com'
