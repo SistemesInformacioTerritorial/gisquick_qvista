@@ -120,21 +120,30 @@ export default {
         if (!geom) {
           return
         }
-        const resolution = map.getView().getResolution()
+        const view = map.getView()
         let padding = options.padding || map.ext.visibleAreaPadding()
         if (geom.getType() === 'Point') {
           const center = geom.getCoordinates()
+          const scale = 2000
+          const mpu = 0.28e-3
+          const targetResolution = scale * mpu
+
+          const zoom = Math.round(view.getZoomForResolution(targetResolution))
+          const resolution = view.getResolutionForZoom(zoom)
+
           center[0] += (-padding[3] * resolution + padding[1] * resolution) / 2
           center[1] += (-padding[2] * resolution + padding[0] * resolution) / 2
-          map.getView().animate({
+          view.animate({
             center,
+            resolution,
             duration: 450
           })
         } else {
+          const resolution = view.getResolution()
           const extent = geom.getExtent()
           // add 5% buffer (padding)
           const buffer = (map.getSize()[0] - padding[1] - padding[3]) * 0.05 * resolution
-          map.getView().fit(bufferExtent(extent, buffer), { duration: 450, padding })
+          view.fit(bufferExtent(extent, buffer), { duration: 450, padding })
         }
       },
       zoomToFeature: (feature, options = {}) => {

@@ -48,10 +48,14 @@ export default {
   },
   methods: {
     updateScale () {
-      const scale = this.$map.getView().getScale()
-      if (scale) { // filters empty values during zoom animation
-        this.scale = scale
-      }
+      const view = this.$map.getView()
+      const resolution = view.getResolution()
+
+      if (!resolution) return
+
+      const mpu = 0.00028
+      const scale = resolution / mpu
+      this.scale = Math.round(scale)
     }
   }
 }
