@@ -29,12 +29,14 @@
           v-if="filters[column.key]"
           class="f-row-ac"
           :attribute="column.attr"
+          :layerName="layer.name"
           :label="column.label"
           :filter="filters[column.key]"
           :sort="sortBy.property === column.key ? sortBy.order : ''"
           @change="onFilterChange(column.key, $event)"
           @clear="clearFilter(column.key)"
           @click:label="toggleSort(column.key)"
+          @show-unique-values="openPopup"
         />
       </template>
       <template v-slot:cell(actions)="{ row, item }">
@@ -140,6 +142,55 @@
       :selectedColor="highlightColor"
       :selected="selectedFeature"
     />
+
+    <v-dialog v-model="showDialog">
+      <div
+        v-if="showDialog"
+        class="custom-dialog"
+        @click="closeDialog"
+      >
+        <div class="dialog-content" @click.stop>
+          <div class="dialog-header">
+            <h3>{{ selectedAttribute }}</h3>
+
+            <button class="close-x" @click="closeDialog">
+              ✕
+            </button>
+          </div>
+
+          <input
+            v-model="searchText"
+            placeholder="Buscar..."
+            class="search-input"
+          />
+
+          <ul>
+            <li v-for="v in paginatedValues" :key="v">
+              {{ v }}
+            </li>
+          </ul>
+
+          <div class="pagination">
+            <button
+              class="pagination-btn"
+              @click="page--" :disabled="page === 1"
+            >
+              <v-icon name="navigate_before"/>
+            </button>
+
+            <span>{{ page }} / {{ totalPages }}</span>
+
+            <button
+              class="pagination-btn"
+              @click="page++" :disabled="page === totalPages"
+            >
+              <v-icon name="navigate_next"/>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </v-dialog>
   </div>
 </template>
 
@@ -154,6 +205,16 @@ export default {
   name: 'attribute-table',
   mixins: [FetchMixin, TableMixin],
   components: { AttributeFilter, FeaturesViewer },
+  data() {
+    return {
+      uniqueValues: [],
+      selectedAttribute: null,
+      showDialog: false,
+      page: 1,
+      pageSize: 20,
+      searchText: '',
+    }
+  },
   props: {
     project: Object,
     layer: Object,
@@ -172,9 +233,26 @@ export default {
     }
   },
   computed: {
+    filteredValues() {
+      if (!this.searchText) return this.uniqueValues
+      const search = this.searchText.toLowerCase()
+
+      return this.uniqueValues.filter(v =>
+        String(v).toLowerCase().includes(search)
+      )
+    },
+    paginatedValues() {
+      const start = (this.page - 1) * this.pageSize
+
+      return this.filteredValues.slice(start, start + this.pageSize)
+    },
+    totalPages() {
+      const totalPage = Math.ceil(this.filteredValues.length / this.pageSize)
+      if(totalPage) return totalPage
+
+      return 1
+    },
     selectedFeature () {
-
-
       return this.features.find(f => f.getId() === this.selectedId)
     },
     lastPage () {
@@ -198,6 +276,9 @@ export default {
     }
   },
   methods: {
+    closeDialog() {
+      this.showDialog = false
+    },
     _setFeatures (data) {
       this.$emit('update:features', data.features)
       this.$emit('update:pagination', data.pagination)
@@ -245,12 +326,95 @@ export default {
         property = column
       }
       this.$emit('update:sortBy', { property, order })
+    },
+    openPopup({ attribute, values }) {
+      this.uniqueValues = values
+      this.selectedAttribute = attribute
+      this.showDialog = true
+
+      this.page = 1
+      this.searchText = ''
+    }
+  },
+  watch: {
+    searchText() {
+      this.page = 1
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-x {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.pagination-btn {
+  border: 0px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pagination-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.close-btn {
+  margin-top: 10px;
+}
+.custom-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-content {
+  background: white;
+  padding: 16px;
+  width: 300px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-input {
+  margin-bottom: 8px;
+  padding: 4px;
+}
+
+.values-list {
+  overflow-y: auto;
+  flex-grow: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.close-btn {
+  margin-top: 8px;
+}
 .attribute-table {
   font-size: 14px;
   --icon-color: #555;

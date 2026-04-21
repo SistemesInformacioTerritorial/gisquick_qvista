@@ -1,5 +1,8 @@
 <template>
   <div class="attr-filter" :class="classes">
+    <div class="label f-row-ac" @click="openUniqueValues">
+      <v-icon name="circle-i-outline" size="13"/>
+    </div>
     <div class="label f-row-ac" @click="$emit('click:label')">
       <sort-control :sort="sort" class="mr-2"/>
       <span v-text="attribute.alias || attribute.name"/>
@@ -57,6 +60,7 @@ import DateRange from '@/components/DateRange.vue'
 import SortControl from '@/ui/SortControl.vue'
 import { valueMapItems } from '@/adapters/attributes'
 
+const cache = {}
 const Operators = {
   'DATE_EQUAL': '=',
   'DATE_BETWEEN': '⟨ ⟩',
@@ -215,6 +219,8 @@ export default {
   name: 'attribute-filter',
   components: { SortControl },
   props: {
+    cache: Object,
+    layerName: String,
     attribute: Object,
     filter: Object,
     mobile: Boolean,
@@ -326,6 +332,71 @@ export default {
         // value: valid ? value : null,
         active: active === undefined ? this.filter.active : active
       }
+    },
+    async openUniqueValues () {
+      const key = `${this.layerName}_${this.attribute.name}`
+
+      if (cache[key]) {
+        this.$emit('show-unique-values', cache[key])
+        console.log("cacheados")
+        return
+      }
+
+      const attr = this.attribute.name
+      const url = `/api/map/ows/${window.project}`
+
+      let startIndex = 0
+      const limit = 1000
+      let allValues = new Set()
+      let finished = false
+
+      while (!finished) {
+        const body = `
+          <GetFeature
+            service="WFS"
+            version="1.1.0"
+            outputFormat="application/json"
+            xmlns="http://www.opengis.net/wfs"
+            xmlns:ogc="http://www.opengis.net/ogc">
+            <Query typeName="${this.layerName}">
+              <PropertyName>${attr}</PropertyName>
+            </Query>
+          </GetFeature>
+        `
+
+        const res = await fetch(url + `?STARTINDEX=${startIndex}&MAXFEATURES=${limit}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/xml'
+          },
+          body
+        })
+
+        const data = await res.json()
+
+        data.features.forEach(f => {
+          const v = f.properties[attr]
+          if (v !== null) allValues.add(v)
+        })
+
+        if (data.features.length < limit) {
+          finished = true
+        } else {
+          startIndex += limit
+        }
+      }
+
+      console.log('allValues', allValues)
+      console.log('arrayValues', [...allValues])
+      const popupValues = {
+        attribute: attr,
+        values: [...allValues]
+      }
+
+      cache[key] = popupValues
+
+      // Open popup
+      this.$emit('show-unique-values', popupValues)
     }
   }
 }
