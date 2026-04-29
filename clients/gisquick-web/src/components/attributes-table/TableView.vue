@@ -151,7 +151,7 @@
       >
         <div class="dialog-content" @click.stop>
           <div class="dialog-header">
-            <h3>{{ selectedAttribute }}</h3>
+            <h3>{{ selectedAttribute ? selectedAttribute.label : '' }}</h3>
 
             <button class="close-x" @click="closeDialog">
               ✕
@@ -159,18 +159,29 @@
           </div>
 
           <input
+            v-if="!hasUniqueValuesLimitExceeded"
             v-model="searchText"
             placeholder="Buscar..."
             class="search-input"
           />
 
-          <ul>
-            <li v-for="v in paginatedValues" :key="v">
-              {{ v }}
+          <p v-if="hasUniqueValuesLimitExceeded" class="limit-message">
+            Número de valors únics excedit.
+          </p>
+
+          <ul v-else class="values-list">
+            <li v-for="value in paginatedValues" :key="String(value)">
+              <button
+                type="button"
+                class="value-option"
+                @click="applyUniqueValueFilter(value)"
+              >
+                {{ value }}
+              </button>
             </li>
           </ul>
 
-          <div class="pagination">
+          <div v-if="!hasUniqueValuesLimitExceeded" class="pagination">
             <button
               class="pagination-btn"
               @click="page--" :disabled="page === 1"
@@ -252,6 +263,9 @@ export default {
 
       return 1
     },
+    hasUniqueValuesLimitExceeded () {
+      return this.uniqueValues.length > 80
+    },
     selectedFeature () {
       return this.features.find(f => f.getId() === this.selectedId)
     },
@@ -278,6 +292,7 @@ export default {
   methods: {
     closeDialog() {
       this.showDialog = false
+      this.selectedAttribute = null
     },
     _setFeatures (data) {
       this.$emit('update:features', data.features)
@@ -327,9 +342,30 @@ export default {
       }
       this.$emit('update:sortBy', { property, order })
     },
+    applyUniqueValueFilter (value) {
+      const attributeName = this.selectedAttribute?.name
+      if (!attributeName || !this.filters[attributeName]) {
+        return
+      }
+      this.$emit('update:filters', {
+        ...this.filters,
+        [attributeName]: {
+          ...this.filters[attributeName],
+          active: true,
+          comparator: '=',
+          valid: true,
+          value
+        }
+      })
+      this.closeDialog()
+    },
     openPopup({ attribute, values }) {
       this.uniqueValues = values
-      this.selectedAttribute = attribute
+      const column = this.columns.find(col => col.key === attribute)
+      this.selectedAttribute = {
+        name: attribute,
+        label: column?.label || attribute
+      }
       this.showDialog = true
 
       this.page = 1
@@ -349,6 +385,10 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.dialog-header h3 {
+  margin: 0;
 }
 
 .close-x {
@@ -398,12 +438,30 @@ export default {
   padding: 4px;
 }
 
+.limit-message {
+  margin: 8px 0;
+}
+
 .values-list {
   overflow-y: auto;
   flex-grow: 1;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.value-option {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.value-option:hover {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .pagination {

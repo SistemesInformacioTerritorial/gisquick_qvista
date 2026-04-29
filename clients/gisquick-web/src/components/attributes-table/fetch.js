@@ -138,6 +138,8 @@ export default {
         }
       ]
 
+      if (!features || features.length === 0)  return
+
       features.forEach((feature, id) => {
         // feature.values_.fid = id + 1
         feature.values_.URL_IMATGE = 'google.com'
