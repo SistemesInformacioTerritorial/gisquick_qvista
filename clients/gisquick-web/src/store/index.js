@@ -82,7 +82,8 @@ async function loadQgsXml(projectName, title) {
 
   const resQgz = await fetch(`${baseUrl}${title}.qgz`)
   if (!resQgz.ok) {
-    throw new Error('No se encontró .qgs ni .qgz')
+    console.error('No se encontró .qgs ni .qgz')
+    return
   }
 
   const blob = await resQgz.blob()
@@ -92,7 +93,8 @@ async function loadQgsXml(projectName, title) {
   const qgsFileName = Object.keys(zip.files).find(f => f.endsWith('.qgs'))
 
   if (!qgsFileName) {
-    throw new Error('El .qgz no contiene archivo .qgs')
+    console.error('El .qgz no contiene archivo .qgs')
+    return
   }
 
   const qgsText = await zip.files[qgsFileName].async('string')
@@ -457,7 +459,7 @@ export default new Vuex.Store({
       const tree = state.project.overlays.tree
       const projectBaseName = state.project.config.ows_project.split('/')[1];
       const qgsXml = await loadQgsXml(window.project, projectBaseName);
-      const rotation = getRotationFromQgs(qgsXml) || 0
+      const rotation = qgsXml && getRotationFromQgs(qgsXml) || 0
       commit('setRotation', rotation)
 
       async function fetchLayerData(layer) {
